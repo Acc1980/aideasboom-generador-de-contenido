@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIdeasBoom</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f4f6f9;
+      color: #16385d;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #16385d;
+      color: white;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .header-logo { height: 36px; object-fit: contain; }
+    header h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; display: inline; }
+    .brand-ai { color: #f48a81; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+    header span { font-size: 13px; opacity: 0.6; }
+
+    /* ── Layout ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Botón sync ── */
+    .sync-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .sync-bar p { flex: 1; font-size: 14px; color: #555; }
+    #syncStatus { font-size: 13px; color: #888; }
+
+    /* ── Botones ── */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #16385d; color: white; }
+    .btn-success { background: #f48a81; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+    /* ── Sección ── */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #16385d;
+    }
+
+    /* ── Tarjetas de cliente ── */
+    .clients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .client-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .client-card .client-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .client-card .client-meta {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+    .badge-premium { background: #fef3c7; color: #d97706; }
+    .badge-basico  { background: #e0f2fe; color: #0284c7; }
+    .badge-active  { background: #d1fae5; color: #059669; }
+
+    .client-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Distribución de piezas por semana ── */
+    .pkg-distribution {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .pkg-distribution-label {
+      font-size: 10px; color: #9ca3af; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-right: 2px;
+    }
+    .dist-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .dist-pill-reel    { background: #fef3c7; color: #b45309; }
+    .dist-pill-post    { background: #d1fae5; color: #047857; }
+    .dist-pill-carrusel{ background: #ede9fe; color: #5b21b6; }
+
+    /* ── Logo del cliente ── */
+    .client-logo-wrap {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .client-logo {
+      height: 48px; max-width: 120px; object-fit: contain;
+      border-radius: 6px; border: 1px solid #f1f5f9;
+      padding: 4px; background: #fafafa;
+    }
+    .logo-placeholder {
+      height: 48px; width: 80px; border-radius: 6px;
+      border: 2px dashed #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #9ca3af;
+    }
+    .btn-logo {
+      font-size: 11px; padding: 5px 10px;
+      background: #f1f5f9; color: #475569;
+      border: none; border-radius: 6px;
+      cursor: pointer; font-weight: 600;
+    }
+    .btn-logo:hover { background: #e2e8f0; }
+    .piece-logo {
+      height: 24px; max-width: 64px;
+      object-fit: contain; opacity: 0.65; margin-left: auto;
+    }
+    .piece-img-wrap { margin-bottom: 14px; }
+    .piece-img {
+      max-width: 200px; border-radius: 8px;
+      border: 1px solid #e2e8f0; display: block;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .piece-img:hover { transform: scale(1.03); }
+
+    /* ── Swatches de color de marca ── */
+    .brand-colors {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 12px;
+    }
+    .color-swatch {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.1);
+      display: inline-block; cursor: pointer;
+      title: attr(title);
+    }
+    .color-swatch.empty {
+      border: 2px dashed #e2e8f0; background: transparent;
+    }
+    .brand-colors-label {
+      font-size: 11px; color: #9ca3af; margin-right: 2px;
+    }
+
+    /* ── Modal de colores ── */
+    .color-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .color-row label { font-size: 13px; font-weight: 600; min-width: 130px; }
+    .color-row input[type=color] {
+      width: 44px; height: 36px; border: 1px solid #e2e8f0;
+      border-radius: 8px; cursor: pointer; padding: 2px;
+    }
+    .color-row input[type=text] {
+      width: 100px; padding: 8px 10px;
+      border: 1px solid #e2e8f0; border-radius: 8px;
+      font-size: 13px; font-family: monospace; background: #f8fafc;
+    }
+    .color-preview-bar {
+      height: 40px; border-radius: 10px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+    }
+    .modal h2 { font-size: 18px; margin-bottom: 20px; }
+    .modal-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none;
+      font-size: 20px; cursor: pointer; color: #888;
+    }
+
+    /* ── Barra de progreso de generación ── */
+    .gen-progress { margin-top: 20px; display: none; }
+    .gen-progress-label { font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 600; }
+    .gen-steps { display: flex; flex-direction: column; gap: 8px; }
+    .gen-step {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #9ca3af;
+    }
+    .gen-step .step-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      background: #f1f5f9; color: #9ca3af;
+    }
+    .gen-step.active .step-icon {
+      background: #f48a81; color: white;
+    }
+    .gen-step.active { color: #16385d; font-weight: 600; }
+    .gen-step.done .step-icon { background: #16385d; color: white; }
+    .gen-step.done { color: #16385d; }
+
+    /* ── Formularios ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group select,
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f8fafc;
+    }
+
+    /* ── Sección de contenidos ── */
+    #contentSection { margin-top: 16px; }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .content-header h3 { font-size: 16px; font-weight: 700; }
+
+    .content-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .content-piece {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-left: 4px solid #16385d;
+    }
+    .content-piece.reel   { border-left-color: #f59e0b; }
+    .content-piece.post   { border-left-color: #10b981; }
+    .content-piece.carrusel { border-left-color: #6366f1; }
+
+    .piece-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .piece-format {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+      background: #f1f5f9; color: #475569;
+    }
+    .piece-funnel {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .funnel-tofu  { background: #d1fae5; color: #059669; }
+    .funnel-mofu  { background: #fef3c7; color: #d97706; }
+    .funnel-bofu  { background: #fee2e2; color: #dc2626; }
+
+    .piece-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .piece-hook  { font-size: 13px; color: #555; font-style: italic; margin-bottom: 8px; }
+    .piece-copy  { font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 10px; }
+    .piece-cta   { font-size: 12px; font-weight: 600; color: #f48a81; }
+    .piece-hashtags { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+
+    /* ── Publish actions ── */
+    .publish-actions {
+      display: flex; gap: 8px; margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .btn-publish {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-publish:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+    .btn-copy-caption {
+      background: #eef2ff; color: #4338ca;
+    }
+    .btn-copy-caption:hover { background: #e0e7ff; }
+    .btn-download-img {
+      background: #f0fdf4; color: #16a34a;
+    }
+    .btn-download-img:hover { background: #dcfce7; }
+    .btn-copy-caption.copied {
+      background: #d1fae5; color: #065f46;
+    }
+
+    /* ── Tabs contenidos/stories ── */
+    .content-tabs {
+      display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #e5e7eb;
+    }
+    .content-tab {
+      padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+      border: none; background: none; color: #9ca3af; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.15s;
+    }
+    .content-tab:hover { color: #374151; }
+    .content-tab.active { color: #16385d; border-bottom-color: #16385d; }
+
+    /* ── Stories ── */
+    .stories-bar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-bottom: 16px; padding: 14px 18px;
+      background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .story-day-group {
+      background: white; border-radius: 12px; padding: 20px;
+      margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .story-day-title {
+      font-size: 16px; font-weight: 700; color: #16385d;
+      margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;
+    }
+    .story-card {
+      padding: 14px; margin-bottom: 10px; border-radius: 10px;
+      border-left: 4px solid #e5e7eb; background: #fafbfc;
+    }
+    .story-card.grabada { border-left-color: #f48a81; background: #fef7f6; }
+    .story-card.texto   { border-left-color: #6366f1; }
+    .story-card.interactiva { border-left-color: #f59e0b; }
+    .story-card-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .story-type-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 16px;
+      background: #f1f5f9; color: #475569;
+    }
+    .story-type-badge.recorded { background: #fce4ec; color: #c62828; }
+    .story-order { font-size: 12px; color: #9ca3af; margin-left: auto; }
+    .story-text { font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 6px; }
+    .story-script { font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 6px; font-style: italic; background: #fff5f5; padding: 10px; border-radius: 8px; }
+    .story-visual { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .story-cta { font-size: 12px; font-weight: 600; color: #f48a81; }
+    .story-sticker { font-size: 12px; color: #f59e0b; font-weight: 500; }
+    .story-approval {
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 48px;
+      color: #9ca3af;
+      background: white;
+      border-radius: 12px;
+    }
+    .empty p { font-size: 15px; margin-top: 8px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #16385d; color: white;
+      padding: 14px 20px; border-radius: 10px;
+      font-size: 14px; font-weight: 500;
+      display: none; z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    #toast.show { display: block; }
+    #toast.error { background: #dc2626; }
+    #toast.success { background: #16385d; }
+
+    /* ── Loading ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .back-btn {
+      background: none; border: none;
+      font-size: 14px; color: #f48a81;
+      cursor: pointer; font-weight: 600;
+      margin-bottom: 16px; display: inline-flex;
+      align-items: center; gap: 4px;
+    }
+
+    .approval-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      flex-wrap: wrap;
+    }
+
+    /* ── Eventos ── */
+    .btn-eventos {
+      padding: 7px 14px; font-size: 13px; font-weight: 600;
+      background: #fef3c7; color: #92400e;
+      border: 1.5px solid #f59e0b; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-eventos:hover { background: #fde68a; }
+    .event-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #f59e0b; color: white; font-size: 10px; font-weight: 700;
+      width: 18px; height: 18px; border-radius: 50%; margin-left: 4px;
+    }
+    .events-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; max-height: 320px; overflow-y: auto; }
+    .event-item {
+      background: #f8fafc; border-radius: 10px; padding: 14px;
+      border-left: 4px solid #f59e0b; position: relative;
+    }
+    .event-item-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .event-item-meta { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .event-stage-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+    }
+    .stage-siembra  { background: #dbeafe; color: #1d4ed8; }
+    .stage-anuncio  { background: #fef3c7; color: #92400e; }
+    .stage-urgencia { background: #fee2e2; color: #dc2626; }
+    .stage-activo   { background: #d1fae5; color: #059669; }
+    .stage-post     { background: #f3e8ff; color: #7c3aed; }
+    .event-item-actions {
+      position: absolute; top: 10px; right: 10px;
+      display: flex; gap: 6px;
+    }
+    .event-btn-icon {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; color: #9ca3af; padding: 2px;
+    }
+    .event-btn-icon:hover { color: #374151; }
+    .event-form-divider {
+      border: none; border-top: 1px solid #e5e7eb;
+      margin: 16px 0;
+    }
+    .event-form-row {
+      display: flex; gap: 10px; margin-bottom: 12px;
+    }
+    .event-form-row .form-group { flex: 1; margin-bottom: 0; }
+    .modal-wide { max-width: 560px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <h1 class="brand-title"><span class="brand-ai">AI</span>deas Boom</h1>
+  </div>
+  <span>Panel de gestión de contenidos</span>
+</header>
+
+<main>
+
+  <!-- Barra de sincronización -->
+  <div class="sync-bar">
+    <p>Sincroniza los datos desde Google Sheets antes de generar una planeación.</p>
+    <span id="syncStatus"></span>
+    <button class="btn btn-primary" id="btnSync" onclick="syncSheets()">
+      Sincronizar Google Sheets
+    </button>
+  </div>
+
+  <!-- Vista: lista de clientes -->
+  <div id="viewClients">
+    <div class="section-title">Clientes</div>
+    <div id="clientsGrid" class="clients-grid">
+      <div class="empty"><p>Cargando clientes...</p></div>
+    </div>
+  </div>
+
+  <!-- Vista: contenidos generados -->
+  <div id="viewContent" style="display:none">
+    <button class="back-btn" onclick="showClients()">← Volver a clientes</button>
+    <div id="contentSection"></div>
+  </div>
+
+</main>
+
+<!-- Modal: generar planeación -->
+<div class="modal-overlay" id="modalGenerar">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2>Generar planeación semanal</h2>
+    <div class="form-group">
+      <label>Cliente</label>
+      <input type="text" id="inputClientName" disabled />
+    </div>
+    <div class="form-group">
+      <label>Año</label>
+      <select id="inputYear"></select>
+    </div>
+    <div class="form-group">
+      <label>Mes</label>
+      <select id="inputMonth">
+        <option value="1">Enero</option>
+        <option value="2">Febrero</option>
+        <option value="3">Marzo</option>
+        <option value="4">Abril</option>
+        <option value="5">Mayo</option>
+        <option value="6">Junio</option>
+        <option value="7">Julio</option>
+        <option value="8">Agosto</option>
+        <option value="9">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Semana</label>
+      <select id="inputWeek">
+        <option value="1">Semana 1</option>
+        <option value="2">Semana 2</option>
+        <option value="3">Semana 3</option>
+        <option value="4">Semana 4</option>
+      </select>
+    </div>
+    <button class="btn btn-success" id="btnGenerar" onclick="generarPlaneacion()" style="width:100%">
+      Generar contenido con IA
+    </button>
+
+    <div class="gen-progress" id="genProgress">
+      <div class="gen-progress-label">Generando en 3 pasos...</div>
+      <div class="gen-steps">
+        <div class="gen-step" id="step-plan">
+          <div class="step-icon">1</div>
+          <span>Inicializando planeación</span>
+        </div>
+        <div class="gen-step" id="step-post">
+          <div class="step-icon">2</div>
+          <span>Generando posts</span>
+        </div>
+        <div class="gen-step" id="step-carrusel">
+          <div class="step-icon">3</div>
+          <span>Generando carruseles</span>
+        </div>
+        <div class="gen-step" id="step-reel">
+          <div class="step-icon">4</div>
+          <span>Generando reels</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: colores de marca -->
+<div class="modal-overlay" id="modalColores">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeColoresModal()">×</button>
+    <h2 style="margin-bottom:6px">Colores y tipografía de marca</h2>
+    <p style="font-size:13px;color:#888;margin-bottom:16px">Se aplican en las imágenes generadas.</p>
+
+    <div class="color-preview-bar" id="colorPreviewBar">Vista previa</div>
+
+    <div class="color-row">
+      <label>Color principal</label>
+      <input type="color" id="cpPrimary" oninput="syncColor('primary',this.value)">
+      <input type="text"  id="ctPrimary" maxlength="7" placeholder="#8fa394" oninput="syncColorText('primary',this.value)">
+    </div>
+    <div class="color-row">
+      <label>Color de acento</label>
+      <input type="color" id="cpAccent" oninput="syncColor('accent',this.value)">
+      <input type="text"  id="ctAccent" maxlength="7" placeholder="#c88d74" oninput="syncColorText('accent',this.value)">
+    </div>
+    <div class="color-row">
+      <label>Texto oscuro</label>
+      <input type="color" id="cpText" oninput="syncColor('text',this.value)">
+      <input type="text"  id="ctText" maxlength="7" placeholder="#2c2c2c" oninput="syncColorText('text',this.value)">
+    </div>
+    <div class="color-row">
+      <label>Fondo claro / crema</label>
+      <input type="color" id="cpLight" oninput="syncColor('light',this.value)">
+      <input type="text"  id="ctLight" maxlength="7" placeholder="#e8e6e1" oninput="syncColorText('light',this.value)">
+    </div>
+
+    <p style="font-size:12px;color:#aaa;margin:14px 0 4px">Tipografía — escribe el nombre exacto de Google Fonts</p>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Fuente para títulos</label>
+      <input type="text" id="inputTitleFont" placeholder="Cormorant Garamond"
+        style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label>Fuente para texto</label>
+      <input type="text" id="inputBodyFont" placeholder="Montserrat"
+        style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+    </div>
+    <p style="font-size:12px;color:#aaa;margin:14px 0 4px">Piezas por semana — distribución personalizada</p>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <div style="flex:1">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;color:#b45309">▶ Reels</label>
+        <input type="number" id="inputDistReels" min="0" max="10" value="2"
+          style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;text-align:center">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;color:#047857">✦ Posts</label>
+        <input type="number" id="inputDistPosts" min="0" max="10" value="2"
+          style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;text-align:center">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;color:#5b21b6">☰ Carruseles</label>
+        <input type="number" id="inputDistCarruseles" min="0" max="10" value="2"
+          style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;text-align:center">
+      </div>
+    </div>
+    <button class="btn btn-success" id="btnSaveColores" onclick="saveColores()" style="width:100%">
+      Guardar
+    </button>
+  </div>
+</div>
+
+<!-- Modal: eventos del cliente -->
+<div class="modal-overlay" id="modalEventos">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeEventosModal()">×</button>
+    <h2 id="eventosModalTitle">Eventos</h2>
+    <p style="font-size:13px;color:#888;margin-bottom:16px">El sistema ajusta automáticamente los prompts y distribución según la etapa del evento.</p>
+
+    <div id="eventsList" class="events-list"></div>
+
+    <hr class="event-form-divider">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px" id="eventFormTitle">Nuevo evento</h3>
+
+    <div class="form-group">
+      <label>Nombre del evento</label>
+      <input type="text" id="evName" placeholder="Ej: Reconociendo mi poder">
+    </div>
+    <div class="event-form-row">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="evType">
+          <option value="entrenamiento">Entrenamiento</option>
+          <option value="taller">Taller</option>
+          <option value="masterclass">Masterclass</option>
+          <option value="lanzamiento">Lanzamiento</option>
+          <option value="retiro">Retiro</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Precio</label>
+        <input type="text" id="evPrice" placeholder="Ej: 99 USD">
+      </div>
+    </div>
+    <div class="event-form-row">
+      <div class="form-group">
+        <label>Fecha inicio</label>
+        <input type="date" id="evStartDate">
+      </div>
+      <div class="form-group">
+        <label>Fecha fin (opcional)</label>
+        <input type="date" id="evEndDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Horario</label>
+      <input type="text" id="evSchedule" placeholder="Ej: 6:30 pm a 9:30 pm">
+    </div>
+    <div class="form-group">
+      <label>Descripción (contexto para la IA)</label>
+      <textarea id="evDescription" rows="2" placeholder="Entrenamiento presencial para mujeres que quieren..."
+        style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#f8fafc;resize:vertical;font-family:inherit"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Beneficios clave (uno por línea)</label>
+      <textarea id="evBenefits" rows="3" placeholder="Reconocer patrones inconscientes&#10;Soltar el control desde el miedo&#10;Tomar decisiones desde tu poder"
+        style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#f8fafc;resize:vertical;font-family:inherit"></textarea>
+    </div>
+    <div class="form-group">
+      <label>URL de inscripción (opcional)</label>
+      <input type="text" id="evUrl" placeholder="https://...">
+    </div>
+
+    <input type="hidden" id="evEditId" value="">
+    <button class="btn btn-success" id="btnSaveEvent" onclick="saveEvent()" style="width:100%">
+      Guardar evento
+    </button>
+  </div>
+</div>
+
+<!-- Toast de notificaciones -->
+<div id="toast"></div>
+
+<script>
+  const API = '';
+  let currentClientId = null;
+
+  // ── Utilidades ───────────────────────────────────────────────────
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    setTimeout(() => el.className = '', 3500);
+  }
+
+  function setLoading(btnId, loading, label) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading ? `<span class="spinner"></span>${label}` : label;
+  }
+
+  // ── Poblar año en el select ──────────────────────────────────────
+  const yearSelect = document.getElementById('inputYear');
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y <= currentYear + 1; y++) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+  }
+  // Mes actual por defecto
+  document.getElementById('inputMonth').value = new Date().getMonth() + 1;
+
+  // ── Cargar clientes ──────────────────────────────────────────────
+  async function loadClients() {
+    const grid = document.getElementById('clientsGrid');
+    try {
+      const res = await fetch(`${API}/api/clients`);
+      const clients = await res.json();
+
+      if (!clients.length) {
+        grid.innerHTML = `<div class="empty">
+          <p>No hay clientes aún.</p>
+          <p style="margin-top:8px;font-size:13px">Sincroniza los datos desde Google Sheets para comenzar.</p>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = clients.map(c => `
+        <div class="client-card" id="card-${c.id}">
+          <div class="client-logo-wrap">
+            ${c.logoUrl
+              ? `<img class="client-logo" src="${c.logoUrl}" alt="Logo ${c.name}" onerror="this.style.display='none'">`
+              : `<div class="logo-placeholder">Sin logo</div>`
+            }
+            <label class="btn-logo" title="Subir logo">
+              ${c.logoUrl ? 'Cambiar logo' : 'Subir logo'}
+              <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                style="display:none" onchange="uploadLogo('${c.id}', this)">
+            </label>
+          </div>
+          <div class="client-name">${c.name}</div>
+          <div class="client-meta" style="margin-bottom:8px">
+            <span class="badge badge-${c.packageType}">${c.packageType}</span>
+            <span class="badge badge-active">Activo</span>
+          </div>
+          ${buildDistributionBadges(c.packageType, c.brandIdentity)}
+          <div class="client-meta">${c.industry || ''} ${c.targetAudience ? '· ' + c.targetAudience.substring(0, 60) + '...' : ''}</div>
+          ${buildColorSwatches(c.brandIdentity)}
+          <div class="client-actions" style="margin-top:14px">
+            <button class="btn btn-success btn-sm" onclick="openModal('${c.id}','${c.name}')">
+              + Generar planeación
+            </button>
+            <button class="btn btn-sm" style="background:#f1f5f9;color:#475569" onclick="verContenidos('${c.id}','${c.name}')">
+              Ver contenidos
+            </button>
+            <button class="btn-eventos" onclick="openEventosModal('${c.id}','${c.name}')">
+              Eventos <span id="evCount-${c.id}" class="event-count" style="display:none">0</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // Cargar contadores de eventos en background
+      loadEventCounts(clients);
+    } catch (e) {
+      grid.innerHTML = `<div class="empty"><p>Error al cargar clientes.</p></div>`;
+    }
+  }
+
+  // ── Subir logo de cliente ────────────────────────────────────────
+  async function uploadLogo(clientId, input) {
+    if (!input.files[0]) return;
+    const formData = new FormData();
+    formData.append('logo', input.files[0]);
+    try {
+      const res = await fetch(`${API}/api/clients/${clientId}/logo`, {
+        method: 'POST', body: formData,
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast('Logo actualizado', 'success');
+        loadClients(); // recargar tarjetas
+      } else {
+        toast('Error: ' + data.error, 'error');
+      }
+    } catch (e) {
+      toast('Error subiendo logo', 'error');
+    }
+  }
+
+  // ── Sincronizar Sheets ───────────────────────────────────────────
+  async function syncSheets() {
+    setLoading('btnSync', true, 'Sincronizando...');
+    document.getElementById('syncStatus').textContent = '';
+    try {
+      const res = await fetch(`${API}/api/sync`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        const r = data.result;
+        const c = r.clientes || {};
+        const msg = `Clientes: +${c.created||0} nuevos, ${c.updated||0} actualizados`;
+        document.getElementById('syncStatus').textContent = msg;
+        toast('Sincronización completada', 'success');
+        loadClients();
+      } else {
+        toast('Error: ' + data.error, 'error');
+      }
+    } catch (e) {
+      toast('No se pudo sincronizar', 'error');
+    } finally {
+      setLoading('btnSync', false, 'Sincronizar Google Sheets');
+    }
+  }
+
+  // ── Modal generar planeación ─────────────────────────────────────
+  function openModal(clientId, clientName) {
+    currentClientId = clientId;
+    document.getElementById('inputClientName').value = clientName;
+    document.getElementById('modalGenerar').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalGenerar').classList.remove('open');
+    document.getElementById('genProgress').style.display = 'none';
+    ['step-plan','step-post','step-carrusel','step-reel'].forEach(s => setStep(s, ''));
+    currentClientId = null;
+  }
+
+  function setStep(stepId, state) {
+    const el = document.getElementById(stepId);
+    el.className = 'gen-step ' + state;
+    // Cambiar el icono del círculo según estado
+    const icon = el.querySelector('.step-icon');
+    if (state === 'done') icon.textContent = '✓';
+    else if (state === 'active') icon.textContent = '●';
+    // fuerza repaint para que el browser muestre el cambio antes del await siguiente
+    el.offsetHeight;
+  }
+
+  async function generarPlaneacion() {
+    const year  = parseInt(document.getElementById('inputYear').value, 10);
+    const month = parseInt(document.getElementById('inputMonth').value, 10);
+    const week  = parseInt(document.getElementById('inputWeek').value, 10);
+
+    const btn = document.getElementById('btnGenerar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Iniciando...';
+
+    const progress = document.getElementById('genProgress');
+    progress.style.display = 'block';
+    ['step-plan','step-post','step-carrusel','step-reel'].forEach(s => setStep(s, ''));
+
+    let planningId = null;
+    let isRegenerate = false;
+    const clientName = document.getElementById('inputClientName').value;
+
+    try {
+      // ── Paso 1: crear planeación ──
+      setStep('step-plan', 'active');
+      const res1 = await fetch(`${API}/api/planning/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: currentClientId, year, month, week }),
+      });
+      const data1 = await res1.json();
+
+      if (res1.status === 409 && data1.planningId) {
+        const regen = confirm(`Ya existe S${week} de ${['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][month]} ${year}.\n\n¿Regenerar contenido? (OK = Regenerar, Cancelar = Ver existente)`);
+        if (!regen) {
+          setStep('step-plan', '');
+          progress.style.display = 'none';
+          closeModal();
+          verContenidos(currentClientId, clientName);
+          return;
+        }
+        planningId = data1.planningId;
+        isRegenerate = true;
+      } else if (!res1.ok) {
+        toast(data1.error || 'Error al crear planeación', 'error');
+        setStep('step-plan', '');
+        progress.style.display = 'none';
+        return;
+      } else {
+        planningId = data1.planningId;
+      }
+      const dist = data1.distribution || {};
+      setStep('step-plan', 'done');
+
+      // ── Paso 2: posts ──
+      setStep('step-post', 'active');
+      document.querySelector('#step-post span').textContent = isRegenerate ? 'Regenerando posts...' : 'Generando posts...';
+      btn.innerHTML = '<span class="spinner"></span>Posts...';
+      const res2 = await fetch(`${API}/api/planning/${planningId}/generate-format`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'post', replace: isRegenerate }),
+      });
+      if (!res2.ok) { const d = await res2.json(); toast(d.error || 'Error generando posts', 'error'); return; }
+      setStep('step-post', 'done');
+
+      // ── Paso 3: carruseles ──
+      setStep('step-carrusel', 'active');
+      document.querySelector('#step-carrusel span').textContent = isRegenerate ? 'Regenerando carruseles...' : 'Generando carruseles...';
+      btn.innerHTML = '<span class="spinner"></span>Carruseles...';
+      const res3 = await fetch(`${API}/api/planning/${planningId}/generate-format`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'carrusel', replace: isRegenerate }),
+      });
+      if (!res3.ok) { const d = await res3.json(); toast(d.error || 'Error generando carruseles', 'error'); return; }
+      setStep('step-carrusel', 'done');
+
+      // ── Paso 4: reels ──
+      setStep('step-reel', 'active');
+      document.querySelector('#step-reel span').textContent = isRegenerate ? 'Regenerando reels...' : 'Generando reels...';
+      btn.innerHTML = '<span class="spinner"></span>Reels...';
+      const res4 = await fetch(`${API}/api/planning/${planningId}/generate-format`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'reel', replace: isRegenerate }),
+      });
+      if (!res4.ok) { const d = await res4.json(); toast(d.error || 'Error generando reels', 'error'); return; }
+      setStep('step-reel', 'done');
+
+      toast('Planeación completa', 'success');
+      const clientIdFinal = currentClientId; // guardar antes de que closeModal lo ponga null
+      setTimeout(() => {
+        closeModal();
+        verContenidos(clientIdFinal, clientName);
+      }, 800);
+
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Generar contenido con IA';
+      progress.style.display = 'none';
+      ['step-plan','step-post','step-carrusel','step-reel'].forEach(s => setStep(s, ''));
+    }
+  }
+
+  // ── Ver contenidos de un cliente ─────────────────────────────────
+  async function verContenidos(clientId, clientName) {
+    document.getElementById('viewClients').style.display = 'none';
+    document.getElementById('viewContent').style.display = 'block';
+
+    const section = document.getElementById('contentSection');
+    section.innerHTML = `<div class="empty"><p>Cargando contenidos...</p></div>`;
+
+    // Obtener logo del cliente
+    currentClientLogoUrl = null;
+    try {
+      const rc = await fetch(`${API}/api/clients/${clientId}`);
+      const cl = await rc.json();
+      currentClientLogoUrl = cl.logoUrl || null;
+    } catch (_) {}
+
+    try {
+      // Obtener planeaciones del cliente
+      const resP = await fetch(`${API}/api/planning/client/${clientId}`);
+      const plannings = await resP.json();
+
+      if (!plannings.length) {
+        section.innerHTML = `
+          <div class="content-header">
+            <h3>${clientName}</h3>
+          </div>
+          <div class="empty"><p>Aún no hay planeaciones generadas para este cliente.</p></div>`;
+        return;
+      }
+
+      // Mostrar selector de planeaciones
+      const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const planningOptions = plannings.map(p =>
+        `<option value="${p.id}">${meses[p.month]} ${p.year} — ${p.status}</option>`
+      ).join('');
+
+      section.innerHTML = `
+        <div class="content-header">
+          <h3>${clientName}</h3>
+          <select id="planningSelect" onchange="onPlanningChange(this.value, this.options[this.selectedIndex].dataset)" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px">
+            ${plannings.map(p => `<option value="${p.id}" data-sheet="${p.approvalSheetUrl||''}" data-drive="${p.driveFolderUrl||''}" data-storiessheet="${p.storiesSheetUrl||''}">S${p.week||1} · ${meses[p.month]} ${p.year} — ${p.status}</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="content-tabs">
+          <button class="content-tab active" onclick="switchTab('contenidos')">Contenidos</button>
+          <button class="content-tab" onclick="switchTab('stories')">Stories</button>
+        </div>
+
+        <!-- Tab: Contenidos -->
+        <div id="tabContenidos">
+          <div class="approval-bar" id="approvalBar">
+            <button class="btn btn-sm" id="btnGenImgs" style="background:#f48a81;color:white" onclick="generarImagenes()">
+              Generar imágenes
+            </button>
+            <button class="btn btn-sm" id="btnExport" style="background:#16385d;color:white" onclick="exportarAprobacion()">
+              Exportar aprobación
+            </button>
+            <button class="btn btn-sm" id="btnImport" style="background:white;color:#16385d;border:1.5px solid #16385d" onclick="importarAprobaciones()">
+              Importar aprobaciones
+            </button>
+            <a id="linkSheet" href="#" target="_blank" style="display:none;font-size:13px;color:#16385d;font-weight:600;text-decoration:none">
+              Abrir sheet →
+            </a>
+            <a id="linkDrive" href="#" target="_blank" style="display:none;font-size:13px;color:#f48a81;font-weight:600;text-decoration:none">
+              Ver en Drive →
+            </a>
+          </div>
+          <div id="piecesList" class="content-list"></div>
+        </div>
+
+        <!-- Tab: Stories -->
+        <div id="tabStories" style="display:none">
+          <div class="stories-bar">
+            <button class="btn btn-sm" id="btnGenStories" style="background:#6366f1;color:white" onclick="generarStories()">
+              Generar stories
+            </button>
+            <button class="btn btn-sm" id="btnGenStoryImgs" style="background:#f48a81;color:white" onclick="generarStoryImagenes()">
+              Generar imágenes
+            </button>
+            <button class="btn btn-sm" id="btnExportStories" style="background:#16385d;color:white" onclick="exportarStoriesApproval()">
+              Exportar aprobación
+            </button>
+            <button class="btn btn-sm" id="btnImportStories" style="background:white;color:#16385d;border:1.5px solid #16385d" onclick="importarStoriesApprovals()">
+              Importar aprobaciones
+            </button>
+            <a id="linkStoriesSheet" href="#" target="_blank" style="display:none;font-size:13px;color:#16385d;font-weight:600;text-decoration:none">
+              Abrir sheet →
+            </a>
+          </div>
+          <div id="storiesList"></div>
+        </div>`;
+
+      // Cargar la primera planeación
+      currentPlanningId = plannings[0].id;
+      updateSheetLink(plannings[0].approvalSheetUrl || '');
+      updateDriveLink(plannings[0].driveFolderUrl || '');
+      updateStoriesSheetLink(plannings[0].storiesSheetUrl || '');
+      loadPlanningContent(plannings[0].id);
+    } catch (e) {
+      section.innerHTML = `<div class="empty"><p>Error al cargar contenidos.</p></div>`;
+    }
+  }
+
+  // Muestra imagen(s) de una pieza.
+  // Post → 1 imagen. Carrusel → tira horizontal con todos los slides.
+  function buildPieceImages(p) {
+    if (!p.imageUrl) return '';
+    if (p.format !== 'carrusel') {
+      return `<div class="piece-img-wrap">
+        <a href="${p.imageUrl}" target="_blank">
+          <img class="piece-img" src="${p.imageUrl}" alt="preview"
+            title="Clic para ver completo" onerror="this.parentElement.parentElement.style.display='none'">
+        </a>
+      </div>`;
+    }
+    // Carrusel: reconstruir URLs de todos los slides por el patrón de nombre
+    const slides = (p.carouselSlides && p.carouselSlides.slides) ? p.carouselSlides.slides : [];
+    if (!slides.length) {
+      return `<div class="piece-img-wrap">
+        <a href="${p.imageUrl}" target="_blank">
+          <img class="piece-img" src="${p.imageUrl}" alt="portada" onerror="this.parentElement.parentElement.style.display='none'">
+        </a>
+      </div>`;
+    }
+    const thumbs = slides.map(s => {
+      const url = `/images/${currentPlanningId}/carousel_${p.order}_s${s.slide}.png`;
+      return `<a href="${url}" target="_blank" style="flex-shrink:0" title="Slide ${s.slide}">
+        <img src="${url}" style="height:130px;border-radius:6px;border:1px solid #e2e8f0;display:block"
+          onerror="this.parentElement.style.display='none'">
+      </a>`;
+    }).join('');
+    return `<div class="piece-img-wrap">
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">${thumbs}</div>
+      <span style="font-size:11px;color:#9ca3af;margin-top:4px;display:block">${slides.length} slides · clic para ver completo</span>
+    </div>`;
+  }
+
+  async function loadPlanningContent(planningId) {
+    const list = document.getElementById('piecesList');
+    list.innerHTML = '<div class="empty"><p>Cargando piezas...</p></div>';
+    try {
+      const res = await fetch(`${API}/api/content/planning/${planningId}`);
+      const pieces = await res.json();
+
+      if (!pieces.length) {
+        list.innerHTML = '<div class="empty"><p>No hay piezas en esta planeación.</p></div>';
+        return;
+      }
+
+      const approvalColors = { aprobado: '#d1fae5', cambios: '#fef3c7', no_va: '#fee2e2', pendiente: '#f1f5f9' };
+      const approvalLabels = { aprobado: '✓ Aprobado', cambios: '✎ Cambios', no_va: '✕ No va', pendiente: '· Pendiente' };
+
+      list.innerHTML = pieces.map(p => `
+        <div class="content-piece ${p.format}">
+          <div class="piece-header">
+            <span class="piece-format">${p.format}</span>
+            <span class="piece-funnel funnel-${p.funnelStage}">${p.funnelStage}</span>
+            <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px;background:${approvalColors[p.approvalStatus||'pendiente']};color:#374151">
+              ${approvalLabels[p.approvalStatus||'pendiente']}
+            </span>
+            <span style="font-size:12px;color:#9ca3af;margin-left:auto">Pieza ${p.order}</span>
+            ${currentClientLogoUrl ? `<img class="piece-logo" src="${currentClientLogoUrl}" alt="logo" onerror="this.style.display='none'">` : ''}
+          </div>
+          ${buildPieceImages(p)}
+          <div class="piece-title">${p.title}</div>
+          ${p.hook ? `<div class="piece-hook">"${p.hook}"</div>` : ''}
+          <div class="piece-copy">${(p.copy || '').substring(0, 300)}${(p.copy||'').length > 300 ? '...' : ''}</div>
+          ${p.cta ? `<div class="piece-cta">CTA: ${p.cta}</div>` : ''}
+          ${p.visualDirection ? `<div class="piece-copy" style="margin-top:8px;font-size:12px;color:#6b7280"><strong>Dirección visual:</strong> ${p.visualDirection}</div>` : ''}
+          ${p.hashtags && p.hashtags.length ? `<div class="piece-hashtags">${p.hashtags.join(' ')}</div>` : ''}
+          ${p.clientComments ? `<div style="margin-top:10px;padding:10px;background:#fef9ec;border-radius:8px;font-size:13px;color:#92400e"><strong>Comentario del cliente:</strong> ${p.clientComments}</div>` : ''}
+          ${p.approvalStatus === 'aprobado' ? `
+          <div class="publish-actions">
+            <button class="btn-publish btn-copy-caption" onclick="copiarCaption(this, '${p.id}')">
+              📋 Copiar caption
+            </button>
+            ${p.format === 'post' ? `<a class="btn-publish btn-download-img" href="/images/${currentPlanningId}/post_${p.order}.png" download="post_${p.order}.png">
+              ⬇ Descargar imagen
+            </a>` : ''}
+            ${p.format === 'carrusel' ? `<button class="btn-publish btn-download-img" onclick="descargarCarrusel(${p.order})">
+              ⬇ Descargar slides
+            </button>` : ''}
+            ${p.format === 'reel' ? `<button class="btn-publish btn-copy-caption" onclick="copiarScript(this, '${p.id}')">
+              🎬 Copiar script
+            </button>` : ''}
+          </div>` : ''}
+        </div>
+      `).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="empty"><p>Error al cargar piezas.</p></div>';
+    }
+  }
+
+  let currentPlanningId = null;
+  let currentClientLogoUrl = null;
+
+  function onPlanningChange(planningId, dataset) {
+    currentPlanningId = planningId;
+    updateSheetLink(dataset.sheet || '');
+    updateDriveLink(dataset.drive || '');
+    updateStoriesSheetLink(dataset.storiessheet || '');
+    loadPlanningContent(planningId);
+    // Si la tab de stories está activa, recargar stories también
+    const storiesTab = document.getElementById('tabStories');
+    if (storiesTab && storiesTab.style.display !== 'none') {
+      loadStories(planningId);
+    }
+  }
+
+  function updateSheetLink(url) {
+    const link = document.getElementById('linkSheet');
+    if (url) { link.href = url; link.style.display = 'inline'; }
+    else { link.style.display = 'none'; }
+  }
+
+  function updateDriveLink(url) {
+    const link = document.getElementById('linkDrive');
+    if (url) { link.href = url; link.style.display = 'inline'; }
+    else { link.style.display = 'none'; }
+  }
+
+  function updateStoriesSheetLink(url) {
+    const link = document.getElementById('linkStoriesSheet');
+    if (link) {
+      if (url) { link.href = url; link.style.display = 'inline'; }
+      else { link.style.display = 'none'; }
+    }
+  }
+
+  async function exportarAprobacion() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnExport');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Creando sheet...';
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}/export-approval`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        toast('Sheet creado. Compártelo con tu cliente.', 'success');
+        updateSheetLink(data.sheetUrl);
+        window.open(data.sheetUrl, '_blank');
+      } else {
+        toast('Error: ' + data.error, 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Exportar para aprobación del cliente';
+    }
+  }
+
+  async function importarAprobaciones() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnImport');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Importando...';
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}/import-approvals`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        toast(`${data.updated} piezas actualizadas con aprobaciones`, 'success');
+        loadPlanningContent(currentPlanningId);
+      } else {
+        toast('Error: ' + data.error, 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Importar aprobaciones';
+    }
+  }
+
+  async function copiarCaption(btn, contentId) {
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}`);
+      const p = await res.json();
+      let caption = p.copy || '';
+      if (p.hashtags && p.hashtags.length) {
+        caption += '\n\n' + p.hashtags.join(' ');
+      }
+      await navigator.clipboard.writeText(caption);
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Copiado';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '📋 Copiar caption';
+      }, 2000);
+    } catch (e) {
+      toast('Error al copiar caption', 'error');
+    }
+  }
+
+  function descargarCarrusel(order) {
+    // Abre cada slide en una pestaña nueva para descargar
+    let opened = 0;
+    for (let i = 1; i <= 10; i++) {
+      const url = `/images/${currentPlanningId}/carousel_${order}_s${i}.png`;
+      const img = new Image();
+      img.onload = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `carousel_${order}_s${i}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        opened++;
+      };
+      img.onerror = () => {
+        if (opened > 0) toast(`${opened} slides descargados`, 'success');
+      };
+      img.src = url;
+    }
+  }
+
+  async function copiarScript(btn, contentId) {
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}`);
+      const p = await res.json();
+      const script = p.script || p.copy || '';
+      await navigator.clipboard.writeText(script);
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Copiado';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '🎬 Copiar script';
+      }, 2000);
+    } catch (e) {
+      toast('Error al copiar script', 'error');
+    }
+  }
+
+  async function regenerarFormato(formato) {
+    if (!currentPlanningId) return;
+    const btnId = `btnRegen${formato.charAt(0).toUpperCase() + formato.slice(1)}`;
+    const btn = document.getElementById(btnId);
+    const label = `Regenerar ${formato}s`;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span>Regenerando...`;
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}/generate-format`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: formato, replace: true }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast(`${data.generated} ${formato}(s) regenerados`, 'success');
+        loadPlanningContent(currentPlanningId);
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = label;
+    }
+  }
+
+  async function generarImagenes() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnGenImgs');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Generando...';
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}/generate-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast(`${data.count} imágenes generadas`, 'success');
+        if (data.folderUrl) updateDriveLink(data.folderUrl);
+        loadPlanningContent(currentPlanningId);
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error generando imágenes', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Generar imágenes';
+    }
+  }
+
+  function showClients() {
+    document.getElementById('viewClients').style.display = 'block';
+    document.getElementById('viewContent').style.display = 'none';
+  }
+
+  // ── Distribución de piezas por paquete ──────────────────────────
+  const PKG_DIST = {
+    basico:  { reels: 2, posts: 2, carruseles: 2 },
+    premium: { reels: 3, posts: 4, carruseles: 4 },
+  };
+  function buildDistributionBadges(packageType, brandIdentity) {
+    const bi = brandIdentity || {};
+    const d = bi.weeklyDistribution || PKG_DIST[packageType] || PKG_DIST.basico;
+    const custom = !!bi.weeklyDistribution;
+    return `<div class="pkg-distribution">
+      <span class="pkg-distribution-label">Por semana${custom ? ' ✎' : ''}:</span>
+      <span class="dist-pill dist-pill-reel">▶ ${d.reels} reels</span>
+      <span class="dist-pill dist-pill-post">✦ ${d.posts} posts</span>
+      <span class="dist-pill dist-pill-carrusel">☰ ${d.carruseles} carruseles</span>
+    </div>`;
+  }
+
+  // ── Colores de marca ─────────────────────────────────────────────
+  function buildColorSwatches(bi) {
+    const bi2 = bi || {};
+    const colors = [bi2.primaryColor, bi2.accentColor, bi2.textColor, bi2.lightColor].filter(Boolean);
+    if (!colors.length) {
+      return `<div class="brand-colors"><span class="brand-colors-label">Sin colores definidos</span></div>`;
+    }
+    return `<div class="brand-colors">
+      <span class="brand-colors-label">Marca:</span>
+      ${colors.map(c => `<span class="color-swatch" style="background:${c}" title="${c}"></span>`).join('')}
+    </div>`;
+  }
+
+  let coloresClientId = null;
+  let coloresBrandIdentity = {};
+  let clientPackageType = 'basico';
+
+  function openColoresModal(clientId, brandIdentityJson, packageType) {
+    coloresClientId = clientId;
+    clientPackageType = packageType || 'basico';
+    try {
+      coloresBrandIdentity = typeof brandIdentityJson === 'string'
+        ? JSON.parse(brandIdentityJson) : (brandIdentityJson || {});
+    } catch { coloresBrandIdentity = {}; }
+
+    const primary    = coloresBrandIdentity.primaryColor || '#8fa394';
+    const accent     = coloresBrandIdentity.accentColor  || '#c88d74';
+    const textCol    = coloresBrandIdentity.textColor    || '#2c2c2c';
+    const lightCol   = coloresBrandIdentity.lightColor   || '#e8e6e1';
+    const titleFont  = coloresBrandIdentity.titleFont    || '';
+    const bodyFont   = coloresBrandIdentity.bodyFont     || '';
+
+    document.getElementById('cpPrimary').value  = primary;
+    document.getElementById('ctPrimary').value  = primary;
+    document.getElementById('cpAccent').value   = accent;
+    document.getElementById('ctAccent').value   = accent;
+    document.getElementById('cpText').value     = textCol;
+    document.getElementById('ctText').value     = textCol;
+    document.getElementById('cpLight').value    = lightCol;
+    document.getElementById('ctLight').value    = lightCol;
+    document.getElementById('inputTitleFont').value = titleFont;
+    document.getElementById('inputBodyFont').value  = bodyFont;
+
+    const wd = coloresBrandIdentity.weeklyDistribution || {};
+    const pkgDef = PKG_DIST[clientPackageType] || PKG_DIST.basico;
+    document.getElementById('inputDistReels').value      = wd.reels      ?? pkgDef.reels;
+    document.getElementById('inputDistPosts').value      = wd.posts      ?? pkgDef.posts;
+    document.getElementById('inputDistCarruseles').value = wd.carruseles ?? pkgDef.carruseles;
+
+    updatePreviewBar();
+    document.getElementById('modalColores').classList.add('open');
+  }
+
+  function closeColoresModal() {
+    document.getElementById('modalColores').classList.remove('open');
+  }
+
+  function syncColor(field, value) {
+    const textId = { primary: 'ctPrimary', accent: 'ctAccent', text: 'ctText', light: 'ctLight' }[field];
+    document.getElementById(textId).value = value;
+    updatePreviewBar();
+  }
+
+  function syncColorText(field, value) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(value)) return;
+    const pickerId = { primary: 'cpPrimary', accent: 'cpAccent', text: 'cpText', light: 'cpLight' }[field];
+    document.getElementById(pickerId).value = value;
+    updatePreviewBar();
+  }
+
+  function updatePreviewBar() {
+    const primary  = document.getElementById('ctPrimary').value || '#8fa394';
+    const accent   = document.getElementById('ctAccent').value  || '#c88d74';
+    const lightCol = document.getElementById('ctLight').value   || '#e8e6e1';
+    const bar = document.getElementById('colorPreviewBar');
+    bar.style.background = primary;
+    bar.style.color = lightCol;
+    bar.style.borderLeft = `8px solid ${accent}`;
+    bar.textContent = 'Vista previa — fondo principal con texto claro';
+  }
+
+  async function saveColores() {
+    if (!coloresClientId) return;
+    const btn = document.getElementById('btnSaveColores');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+    const primary   = document.getElementById('ctPrimary').value;
+    const accent    = document.getElementById('ctAccent').value;
+    const textCol   = document.getElementById('ctText').value;
+    const lightCol  = document.getElementById('ctLight').value;
+    const titleFont     = document.getElementById('inputTitleFont').value.trim();
+    const bodyFont      = document.getElementById('inputBodyFont').value.trim();
+    const distReels     = parseInt(document.getElementById('inputDistReels').value)      || 0;
+    const distPosts     = parseInt(document.getElementById('inputDistPosts').value)      || 0;
+    const distCarruseles= parseInt(document.getElementById('inputDistCarruseles').value) || 0;
+
+    const updatedBrandIdentity = {
+      ...coloresBrandIdentity,
+      primaryColor: primary,
+      accentColor:  accent,
+      textColor:    textCol,
+      lightColor:   lightCol,
+      titleFont:    titleFont || undefined,
+      bodyFont:     bodyFont  || undefined,
+      weeklyDistribution: {
+        reels: distReels, posts: distPosts, carruseles: distCarruseles,
+        total: distReels + distPosts + distCarruseles,
+      },
+    };
+
+    try {
+      const res = await fetch(`${API}/api/clients/${coloresClientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brandIdentity: updatedBrandIdentity }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast('Colores de marca guardados', 'success');
+        closeColoresModal();
+        loadClients();
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Guardar colores';
+    }
+  }
+
+  // ── Eventos ─────────────────────────────────────────────────────
+  let eventosClientId = null;
+  let eventosClientName = '';
+
+  const STAGE_LABELS = {
+    siembra: 'Siembra', anuncio: 'Anuncio', urgencia: 'Urgencia',
+    activo: 'Activo', post: 'Post-evento',
+  };
+  const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  async function openEventosModal(clientId, clientName) {
+    eventosClientId = clientId;
+    eventosClientName = clientName;
+    document.getElementById('eventosModalTitle').textContent = `Eventos · ${clientName}`;
+    clearEventForm();
+    document.getElementById('modalEventos').classList.add('open');
+    await loadEventsList();
+  }
+
+  function closeEventosModal() {
+    document.getElementById('modalEventos').classList.remove('open');
+    eventosClientId = null;
+  }
+
+  function clearEventForm() {
+    document.getElementById('evName').value = '';
+    document.getElementById('evType').value = 'entrenamiento';
+    document.getElementById('evPrice').value = '';
+    document.getElementById('evStartDate').value = '';
+    document.getElementById('evEndDate').value = '';
+    document.getElementById('evSchedule').value = '';
+    document.getElementById('evDescription').value = '';
+    document.getElementById('evBenefits').value = '';
+    document.getElementById('evUrl').value = '';
+    document.getElementById('evEditId').value = '';
+    document.getElementById('eventFormTitle').textContent = 'Nuevo evento';
+    document.getElementById('btnSaveEvent').textContent = 'Guardar evento';
+  }
+
+  async function loadEventsList() {
+    const listEl = document.getElementById('eventsList');
+    listEl.innerHTML = '<p style="font-size:13px;color:#9ca3af;text-align:center">Cargando...</p>';
+    try {
+      const res = await fetch(`${API}/api/events/client/${eventosClientId}/with-stage`);
+      const events = await res.json();
+
+      // Actualizar contador en la tarjeta del cliente
+      const countEl = document.getElementById(`evCount-${eventosClientId}`);
+      if (countEl) {
+        if (events.length > 0) {
+          countEl.textContent = events.length;
+          countEl.style.display = 'inline-flex';
+        } else {
+          countEl.style.display = 'none';
+        }
+      }
+
+      if (!events.length) {
+        listEl.innerHTML = '<p style="font-size:13px;color:#9ca3af;text-align:center">Sin eventos registrados.</p>';
+        return;
+      }
+
+      listEl.innerHTML = events.map(ev => {
+        const start = new Date(ev.startDate);
+        const dateStr = `${start.getDate()} ${MESES[start.getMonth()+1]} ${start.getFullYear()}`;
+        const stageClass = ev.stage ? `stage-${ev.stage}` : '';
+        const stageLabel = ev.stage ? STAGE_LABELS[ev.stage] || ev.stage : 'Sin etapa';
+        const weeksLabel = ev.weeksUntilStart > 0
+          ? `${ev.weeksUntilStart} sem.`
+          : ev.stage === 'activo' ? 'En curso' : '';
+
+        return `<div class="event-item">
+          <div class="event-item-actions">
+            <button class="event-btn-icon" title="Editar" onclick="editEvent('${ev.eventId}')">&#9998;</button>
+            <button class="event-btn-icon" title="Eliminar" onclick="deleteEvent('${ev.eventId}','${ev.name.replace(/'/g,"\\'")}')">&#10005;</button>
+          </div>
+          <div class="event-item-name">${ev.name}</div>
+          <div class="event-item-meta">
+            ${ev.eventType} · ${dateStr}${ev.schedule ? ' · ' + ev.schedule : ''}
+            ${ev.targetPrice ? ' · ' + ev.targetPrice : ''}
+          </div>
+          <span class="event-stage-badge ${stageClass}">${stageLabel}</span>
+          ${weeksLabel ? `<span style="font-size:11px;color:#6b7280;margin-left:6px">${weeksLabel}</span>` : ''}
+          ${ev.keyBenefits && ev.keyBenefits.length ? `<div style="margin-top:6px;font-size:11px;color:#6b7280">${ev.keyBenefits.slice(0,3).join(' · ')}</div>` : ''}
+        </div>`;
+      }).join('');
+    } catch (e) {
+      listEl.innerHTML = '<p style="font-size:13px;color:#dc2626">Error al cargar eventos</p>';
+    }
+  }
+
+  async function saveEvent() {
+    if (!eventosClientId) return;
+    const name = document.getElementById('evName').value.trim();
+    const eventType = document.getElementById('evType').value;
+    const startDate = document.getElementById('evStartDate').value;
+
+    if (!name) { toast('Escribe el nombre del evento', 'error'); return; }
+    if (!startDate) { toast('Selecciona la fecha de inicio', 'error'); return; }
+
+    const benefitsText = document.getElementById('evBenefits').value.trim();
+    const keyBenefits = benefitsText ? benefitsText.split('\n').map(b => b.trim()).filter(Boolean) : [];
+
+    const body = {
+      clientId: eventosClientId,
+      name,
+      eventType,
+      startDate,
+      endDate: document.getElementById('evEndDate').value || null,
+      schedule: document.getElementById('evSchedule').value.trim() || null,
+      description: document.getElementById('evDescription').value.trim() || null,
+      keyBenefits,
+      targetPrice: document.getElementById('evPrice').value.trim() || null,
+      registrationUrl: document.getElementById('evUrl').value.trim() || null,
+    };
+
+    const editId = document.getElementById('evEditId').value;
+    const btn = document.getElementById('btnSaveEvent');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+    try {
+      const url = editId ? `${API}/api/events/${editId}` : `${API}/api/events`;
+      const method = editId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast(editId ? 'Evento actualizado' : 'Evento creado', 'success');
+        clearEventForm();
+        await loadEventsList();
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Guardar evento';
+    }
+  }
+
+  async function editEvent(eventId) {
+    try {
+      const res = await fetch(`${API}/api/events/${eventId}`);
+      const ev = await res.json();
+      if (!res.ok) { toast('Error cargando evento', 'error'); return; }
+
+      document.getElementById('evName').value = ev.name || '';
+      document.getElementById('evType').value = ev.eventType || 'entrenamiento';
+      document.getElementById('evPrice').value = ev.targetPrice || '';
+      document.getElementById('evStartDate').value = ev.startDate || '';
+      document.getElementById('evEndDate').value = ev.endDate || '';
+      document.getElementById('evSchedule').value = ev.schedule || '';
+      document.getElementById('evDescription').value = ev.description || '';
+      document.getElementById('evBenefits').value = (ev.keyBenefits || []).join('\n');
+      document.getElementById('evUrl').value = ev.registrationUrl || '';
+      document.getElementById('evEditId').value = ev.id;
+      document.getElementById('eventFormTitle').textContent = 'Editar evento';
+      document.getElementById('btnSaveEvent').textContent = 'Actualizar evento';
+
+      // Scroll al formulario
+      document.getElementById('eventFormTitle').scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    }
+  }
+
+  async function deleteEvent(eventId, eventName) {
+    if (!confirm(`¿Desactivar el evento "${eventName}"?`)) return;
+    try {
+      const res = await fetch(`${API}/api/events/${eventId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        toast('Evento desactivado', 'success');
+        await loadEventsList();
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    }
+  }
+
+  // Cargar contadores de eventos al cargar clientes
+  async function loadEventCounts(clients) {
+    for (const c of clients) {
+      try {
+        const res = await fetch(`${API}/api/events/client/${c.id}`);
+        const events = await res.json();
+        const countEl = document.getElementById(`evCount-${c.id}`);
+        if (countEl && events.length > 0) {
+          countEl.textContent = events.length;
+          countEl.style.display = 'inline-flex';
+        }
+      } catch (_) {}
+    }
+  }
+
+  // ── Tabs contenidos/stories ─────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+    if (tab === 'contenidos') {
+      document.getElementById('tabContenidos').style.display = 'block';
+      document.getElementById('tabStories').style.display = 'none';
+      document.querySelectorAll('.content-tab')[0].classList.add('active');
+    } else {
+      document.getElementById('tabContenidos').style.display = 'none';
+      document.getElementById('tabStories').style.display = 'block';
+      document.querySelectorAll('.content-tab')[1].classList.add('active');
+      loadStories(currentPlanningId);
+    }
+  }
+
+  // ── Cargar stories ─────────────────────────────────────────────
+  async function loadStories(planningId) {
+    const list = document.getElementById('storiesList');
+    list.innerHTML = '<div class="empty"><p>Cargando stories...</p></div>';
+    try {
+      const res = await fetch(`${API}/api/stories/planning/${planningId}`);
+      const data = await res.json();
+
+      if (!data.days || data.days.length === 0) {
+        list.innerHTML = '<div class="empty"><p>No hay stories generadas para esta planeación.</p><p style="margin-top:8px;font-size:13px">Haz clic en "Generar stories" para crearlas.</p></div>';
+        return;
+      }
+
+      const approvalColors = { aprobado: '#d1fae5', cambios: '#fef3c7', no_va: '#fee2e2', pendiente: '#f1f5f9' };
+      const approvalLabels = { aprobado: '✓ Aprobado', cambios: '✎ Cambios', no_va: '✕ No va', pendiente: '· Pendiente' };
+
+      list.innerHTML = data.days.map(day => `
+        <div class="story-day-group">
+          <div class="story-day-title">${day.dayLabel} (${day.stories.length} stories)</div>
+          ${day.stories.map(s => {
+            const isGrabada = s.isRecorded;
+            const isInteractiva = ['encuesta','pregunta','slider_emocional','quiz','countdown'].includes(s.storyType);
+            const cardClass = isGrabada ? 'grabada' : (isInteractiva ? 'interactiva' : 'texto');
+            const approvalSt = s.approvalStatus || 'pendiente';
+            return `
+            <div class="story-card ${cardClass}">
+              <div class="story-card-header">
+                <span class="story-type-badge ${isGrabada ? 'recorded' : ''}">${isGrabada ? '🎥 ' : ''}${s.storyType}</span>
+                <span class="story-approval" style="background:${approvalColors[approvalSt]};color:#374151">
+                  ${approvalLabels[approvalSt]}
+                </span>
+                <span class="story-order">Story ${s.order}</span>
+              </div>
+              ${s.imageUrl ? `<div style="margin-bottom:10px">
+                <a href="${s.imageUrl}" target="_blank">
+                  <img src="${s.imageUrl}" alt="story preview"
+                    style="height:160px;border-radius:8px;border:1px solid #e2e8f0"
+                    onerror="this.parentElement.parentElement.style.display='none'">
+                </a>
+              </div>` : ''}
+              ${s.script ? `<div class="story-script"><strong>Guion:</strong> ${s.script}</div>` : ''}
+              ${s.textContent ? `<div class="story-text">${s.textContent}</div>` : ''}
+              ${s.visualDirection ? `<div class="story-visual"><strong>Visual:</strong> ${s.visualDirection}</div>` : ''}
+              ${s.cta ? `<div class="story-cta">CTA: ${s.cta}</div>` : ''}
+              ${s.stickerSuggestion ? `<div class="story-sticker">Sticker: ${s.stickerSuggestion}</div>` : ''}
+              ${s.clientComments ? `<div style="margin-top:8px;padding:8px;background:#fef9ec;border-radius:8px;font-size:12px;color:#92400e"><strong>Comentario:</strong> ${s.clientComments}</div>` : ''}
+              ${approvalSt === 'aprobado' ? `
+              <div class="publish-actions">
+                <button class="btn-publish btn-copy-caption" onclick="copiarStoryText(this, '${s.id}')">
+                  📋 Copiar texto
+                </button>
+                ${s.imageUrl ? `<a class="btn-publish btn-download-img" href="${s.imageUrl}" target="_blank" download>
+                  ⬇ Descargar imagen
+                </a>` : ''}
+              </div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+      `).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="empty"><p>Error al cargar stories.</p></div>';
+    }
+  }
+
+  // ── Generar stories ────────────────────────────────────────────
+  async function generarStories() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnGenStories');
+    const hasStories = document.querySelectorAll('.story-day-group').length > 0;
+    if (hasStories && !confirm('Ya hay stories generadas. ¿Deseas reemplazarlas?')) return;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Generando stories...';
+    try {
+      const res = await fetch(`${API}/api/stories/generate/${currentPlanningId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replace: true, storiesPerDay: 5 }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast(`${data.generated} stories generadas (${data.days} días × ${data.perDay}/día)`, 'success');
+        loadStories(currentPlanningId);
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Generar stories';
+    }
+  }
+
+  // ── Exportar aprobación stories ────────────────────────────────
+  async function exportarStoriesApproval() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnExportStories');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Creando sheet...';
+    try {
+      const res = await fetch(`${API}/api/stories/${currentPlanningId}/export-approval`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        toast('Sheet de stories creado. Compártelo con tu cliente.', 'success');
+        updateStoriesSheetLink(data.sheetUrl);
+        window.open(data.sheetUrl, '_blank');
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Exportar aprobación';
+    }
+  }
+
+  // ── Importar aprobaciones stories ──────────────────────────────
+  async function importarStoriesApprovals() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnImportStories');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Importando...';
+    try {
+      const res = await fetch(`${API}/api/stories/${currentPlanningId}/import-approvals`, { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        toast(`${data.updated} stories actualizadas con aprobaciones`, 'success');
+        loadStories(currentPlanningId);
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error de conexión', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Importar aprobaciones';
+    }
+  }
+
+  // ── Generar imágenes de stories ──────────────────────────────────
+  async function generarStoryImagenes() {
+    if (!currentPlanningId) return;
+    const btn = document.getElementById('btnGenStoryImgs');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Generando...';
+    try {
+      const res = await fetch(`${API}/api/stories/${currentPlanningId}/generate-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast(`${data.count} imágenes de stories generadas`, 'success');
+        loadStories(currentPlanningId);
+      } else {
+        toast('Error: ' + (data.error || 'Desconocido'), 'error');
+      }
+    } catch (e) {
+      toast('Error generando imágenes de stories', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Generar imágenes';
+    }
+  }
+
+  // ── Copiar texto de story ──────────────────────────────────────
+  async function copiarStoryText(btn, storyId) {
+    try {
+      const res = await fetch(`${API}/api/stories/planning/${currentPlanningId}`);
+      const data = await res.json();
+      let story = null;
+      for (const day of data.days) {
+        story = day.stories.find(s => s.id === storyId);
+        if (story) break;
+      }
+      if (!story) { toast('Story no encontrada', 'error'); return; }
+
+      const text = story.script || story.textContent || '';
+      await navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Copiado';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '📋 Copiar texto';
+      }, 2000);
+    } catch (e) {
+      toast('Error al copiar texto', 'error');
+    }
+  }
+
+  // ── Arranque ─────────────────────────────────────────────────────
+  loadClients();
+</script>
+</body>
+</html>

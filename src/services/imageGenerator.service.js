@@ -1,0 +1,691 @@
+/**
+ * Image Generator Service
+ *
+ * Genera imágenes PNG de las piezas de contenido usando Puppeteer.
+ * Formatos generados:
+ *   - post     → 1080×1080
+ *   - carrusel → 1080×1080 por slide (todos los slides)
+ *
+ * NOTA: Los reels NO se generan como imagen — el cliente los graba.
+ *
+ * Las imágenes se guardan en src/public/images/<planningId>/
+ * y se actualiza el campo image_url de cada Content.
+ */
+
+const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
+const Content = require('../modules/content/content.model');
+const Planning = require('../modules/planning/planning.model');
+const Client = require('../modules/clients/client.model');
+const logger = require('../config/logger');
+
+const OUTPUT_BASE = path.join(__dirname, '../public/images');
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** Convierte el logo local a data URL base64 para embeber en el HTML */
+function logoToDataUrl(logoUrl) {
+  if (!logoUrl) return null;
+  const localPath = path.join(__dirname, '../public', logoUrl.replace(/^\//, ''));
+  if (!fs.existsSync(localPath)) return null;
+  const ext = path.extname(localPath).slice(1).toLowerCase();
+  const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml', webp: 'image/webp' }[ext] || 'image/png';
+  const data = fs.readFileSync(localPath).toString('base64');
+  return `data:${mime};base64,${data}`;
+}
+
+/** Ajusta tamaño de fuente según longitud del texto */
+function hookFontSize(text, maxPx, minPx) {
+  const len = (text || '').length;
+  if (len > 160) return minPx;
+  if (len > 100) return Math.round(minPx + (maxPx - minPx) * 0.4);
+  if (len > 60)  return Math.round(minPx + (maxPx - minPx) * 0.7);
+  return maxPx;
+}
+
+/**
+ * Genera el bloque @import de Google Fonts.
+ * Solo incluye fuentes que NO sean del sistema (Georgia, Arial, etc.)
+ */
+function buildFontsImport(titleFont, bodyFont) {
+  const sysfonts = ['Georgia', 'Arial', 'Helvetica', 'Times New Roman', 'Verdana', 'Trebuchet MS'];
+  const parts = [];
+  if (titleFont && !sysfonts.includes(titleFont)) {
+    parts.push(`family=${titleFont.replace(/ /g, '+')}:ital,wght@0,400;0,600;0,700;1,400`);
+  }
+  if (bodyFont && !sysfonts.includes(bodyFont) && bodyFont !== titleFont) {
+    parts.push(`family=${bodyFont.replace(/ /g, '+')}:wght@400;500;600;700`);
+  }
+  if (parts.length === 0) return '';
+  return `@import url('https://fonts.googleapis.com/css2?${parts.join('&')}&display=swap');`;
+}
+
+/** Construye stack CSS de fuente con fallback */
+function ff(fontName, type) {
+  const sysfonts = ['Georgia', 'Arial', 'Helvetica', 'Times New Roman', 'Verdana'];
+  if (!fontName || sysfonts.includes(fontName)) {
+    return type === 'serif' ? "Georgia, 'Times New Roman', serif" : "Arial, sans-serif";
+  }
+  const fallback = type === 'serif' ? 'Georgia, serif' : 'Arial, sans-serif';
+  return `'${fontName}', ${fallback}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANTILLA POST (1080×1080)
+// Diseño: Logo grande + Hook hero + línea decorativa + CTA.
+// El copy completo va en el caption de Instagram, NO en la imagen.
+// ─────────────────────────────────────────────────────────────────────────────
+function buildPostHTML(piece, client) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#8fa394';
+  const accent     = bi.accentColor  || '#c88d74';
+  const textColor  = bi.textColor    || '#2c2c2c';
+  const lightColor = bi.lightColor   || '#e8e6e1';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+  const fontSize   = hookFontSize(piece.hook, 88, 62);
+  const hookHtml   = esc(piece.hook || '').replace(/\n/g, '<br>');
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1080px;overflow:hidden}
+  body{
+    background:${lightColor};
+    font-family:${bodyFF};
+    color:${textColor};
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:80px 90px;position:relative;
+  }
+  .logo{position:absolute;top:48px;left:60px;
+    max-width:320px;max-height:130px;object-fit:contain}
+  .hook-wrap{text-align:center;margin-bottom:48px;max-width:920px}
+  .hook{
+    font-family:${titleFF};
+    font-size:${fontSize}px;
+    font-style:italic;
+    font-weight:700;
+    line-height:1.35;
+    color:${primary};
+  }
+  .divider{
+    width:300px;height:2px;
+    background:${accent};
+    margin:0 auto 56px;
+  }
+  .cta{
+    background:${accent};
+    color:${lightColor};
+    padding:22px 64px;
+    border-radius:50px;
+    font-family:${bodyFF};
+    font-size:30px;
+    font-weight:600;
+    letter-spacing:0.4px;
+    text-align:center;
+  }
+</style></head>
+<body>
+  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <div class="hook-wrap"><span class="hook">${hookHtml}</span></div>
+  <div class="divider"></div>
+  <div class="cta">${esc(piece.cta)}</div>
+</body></html>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANTILLA CAROUSEL SLIDE (1080×1080)
+// Genera TODOS los slides: portada, contenido (N-2 slides), cierre con CTA
+// ─────────────────────────────────────────────────────────────────────────────
+function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#0f172a';
+  const accent     = bi.accentColor  || '#a78bfa';
+  const textColor  = bi.textColor    || '#2c2c2c';
+  const lightColor = bi.lightColor   || '#f8fafc';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+
+  const isFirst = slide.slide === 1;
+  const isLast  = slide.slide === totalSlides;
+
+  // Portada y cierre → fondo primary (oscuro), texto lightColor (crema)
+  // Slides de contenido → fondo lightColor (crema), texto textColor (oscuro)
+  const isDark = isFirst || isLast;
+  const bg = isDark ? primary : lightColor;
+  const fg = isDark ? lightColor : textColor;
+
+  // Puntos de progreso
+  const dots = Array.from({ length: totalSlides }, (_, i) => {
+    const active = i + 1 === slide.slide;
+    return `<div style="width:${active ? 20 : 7}px;height:7px;border-radius:4px;background:${accent};opacity:${active ? 1 : 0.3}"></div>`;
+  }).join('');
+
+  const titleHtml = esc(slide.title || '').replace(/\n/g, '<br>');
+  const bodyHtml  = esc(slide.text  || '').replace(/\n/g, '<br>');
+
+  if (isFirst) {
+    // ── PORTADA ─────────────────────────────────────────────────────────────
+    const fSize = hookFontSize(slide.title, 86, 58);
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1080px;overflow:hidden}
+  body{background:${bg};font-family:${bodyFF};color:${fg};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:90px;position:relative}
+  .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
+  .circ{position:absolute;width:500px;height:500px;border-radius:50%;
+    border:1px solid ${accent};opacity:.1;top:-150px;right:-150px}
+  .logo{position:absolute;top:50px;left:60px;max-width:320px;max-height:130px;object-fit:contain}
+  .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
+    font-size:18px;letter-spacing:2px;opacity:.4;color:${fg}}
+  .title{font-size:${fSize}px;line-height:1.2;text-align:center;font-family:${titleFF};
+    font-style:italic;max-width:840px;margin-bottom:40px}
+  .sub{font-family:${bodyFF};font-size:34px;font-weight:700;opacity:.6;text-align:center;
+    max-width:700px;line-height:1.5}
+  .swipe{position:absolute;bottom:56px;right:60px;
+    font-family:${bodyFF};font-size:20px;letter-spacing:2px;opacity:.6;color:${accent}}
+  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+    display:flex;gap:6px;align-items:center}
+</style></head>
+<body>
+  <div class="bar"></div>
+  <div class="circ"></div>
+  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <span class="slide-num">1 / ${totalSlides}</span>
+  <h1 class="title">${titleHtml}</h1>
+  <span class="swipe">Desliza →</span>
+  <div class="dots">${dots}</div>
+</body></html>`;
+  }
+
+  if (isLast) {
+    // ── CIERRE / CTA ─────────────────────────────────────────────────────────
+    // Filtrar el texto del CTA del body para evitar duplicación
+    const ctaText = (piece.cta || '').trim().toLowerCase();
+    let cierreBody = (slide.text || '').trim();
+    if (ctaText) {
+      // Eliminar la porción del body que coincide con el CTA (comparación flexible)
+      const ctaNorm = ctaText.replace(/[^\w\sáéíóúñü]/gi, '').trim();
+      const sentences = cierreBody.split(/(?<=[.!?])\s+/);
+      cierreBody = sentences.filter(s => {
+        const sNorm = s.toLowerCase().replace(/[^\w\sáéíóúñü]/gi, '').trim();
+        return !sNorm.includes(ctaNorm) && !ctaNorm.includes(sNorm);
+      }).join(' ').trim();
+    }
+    const cierreBodyHtml = esc(cierreBody).replace(/\n/g, '<br>');
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1080px;overflow:hidden}
+  body{background:${bg};font-family:${bodyFF};color:${fg};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:90px;position:relative}
+  .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
+  .logo{position:absolute;top:50px;left:60px;max-width:320px;max-height:130px;object-fit:contain}
+  .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
+    font-size:16px;letter-spacing:2px;opacity:.4;color:${fg}}
+  .body-text{font-family:${bodyFF};font-size:40px;font-weight:700;line-height:1.5;
+    text-align:center;max-width:800px;opacity:.85;margin-bottom:56px}
+  .cta-btn{background:${accent};color:${bg};padding:22px 56px;
+    border-radius:50px;font-family:${bodyFF};font-size:28px;
+    font-weight:700;letter-spacing:1px;text-align:center}
+  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+    display:flex;gap:6px;align-items:center}
+</style></head>
+<body>
+  <div class="bar"></div>
+  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <span class="slide-num">${slide.slide} / ${totalSlides}</span>
+  ${cierreBodyHtml ? `<p class="body-text">${cierreBodyHtml}</p>` : ''}
+  <div class="cta-btn">${esc(piece.cta)}</div>
+  <div class="dots">${dots}</div>
+</body></html>`;
+  }
+
+  // ── SLIDE DE CONTENIDO ────────────────────────────────────────────────────
+  const tSize = hookFontSize(slide.title, 62, 48);
+  const bSize = slide.text && slide.text.length > 200 ? 40 : 46;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1080px;overflow:hidden}
+  body{background:${bg};font-family:${bodyFF};color:${fg};
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:64px 80px;position:relative}
+  .top{display:flex;justify-content:space-between;align-items:center}
+  .logo-sm{max-width:240px;max-height:96px;object-fit:contain;opacity:.7}
+  .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.35;color:${fg}}
+  .sep{width:56px;height:3px;background:${accent};margin:28px 0}
+  .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
+    color:${fg};max-width:900px}
+  .body-text{font-size:${bSize}px;line-height:1.7;color:${fg};
+    opacity:.85;max-width:900px;flex:1;padding-top:24px;font-family:${bodyFF}}
+  .dots{display:flex;gap:6px;align-items:center;padding-top:16px}
+</style></head>
+<body>
+  <div class="top">
+    ${logoSrc
+      ? `<img class="logo-sm" src="${logoSrc}">`
+      : `<span style="opacity:.3;font-size:14px;letter-spacing:2px;font-family:${bodyFF}">${esc(client.name)}</span>`
+    }
+    <span class="slide-num">${slide.slide} / ${totalSlides}</span>
+  </div>
+  <div>
+    <div class="sep"></div>
+    <h2 class="title">${titleHtml}</h2>
+    <p class="body-text">${bodyHtml}</p>
+  </div>
+  <div class="dots">${dots}</div>
+</body></html>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FUNCIÓN PRINCIPAL
+// ─────────────────────────────────────────────────────────────────────────────
+async function generateImages(planningId) {
+  const planning = await Planning.findByPk(planningId, {
+    include: [
+      { model: Client, as: 'client' },
+      { model: Content, as: 'contents', order: [['order', 'ASC']] },
+    ],
+  });
+  if (!planning) throw new Error('Planeación no encontrada');
+
+  const client = planning.client;
+  const outputDir = path.join(OUTPUT_BASE, planningId);
+  ensureDir(outputDir);
+
+  // Los reels NO generan imagen — el cliente los graba
+  const pieces = planning.contents.filter(p => p.format !== 'reel');
+  logger.info(`Generando imágenes para planning ${planningId} → ${pieces.length} piezas (reels excluidos)`);
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  });
+
+  const generatedFiles = [];
+
+  try {
+    const page = await browser.newPage();
+
+    for (const piece of pieces) {
+      if (piece.format === 'post') {
+        await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 1 });
+        await page.setContent(buildPostHTML(piece, client), { waitUntil: 'domcontentloaded' });
+        await page.evaluate(() => document.fonts.ready);
+        const filename = `post_${piece.order}.png`;
+        const filePath = path.join(outputDir, filename);
+        await page.screenshot({ path: filePath, type: 'png' });
+        const imageUrl = `/images/${planningId}/${filename}`;
+        await piece.update({ imageUrl });
+        generatedFiles.push({ id: piece.id, format: 'post', imageUrl, filePath });
+        logger.info(`  ✓ ${filename}`);
+
+      } else if (piece.format === 'carrusel') {
+        const slides = piece.carouselSlides?.slides || [];
+        if (slides.length === 0) {
+          logger.warn(`  ⚠ carrusel orden=${piece.order} sin slides — omitido`);
+          continue;
+        }
+        logger.info(`  → carrusel orden=${piece.order}: ${slides.length} slides`);
+        let firstImageUrl = null;
+
+        for (const slide of slides) {
+          await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 1 });
+          await page.setContent(
+            buildCarouselSlideHTML(slide, piece, client, slides.length),
+            { waitUntil: 'domcontentloaded' },
+          );
+          await page.evaluate(() => document.fonts.ready);
+          const filename = `carousel_${piece.order}_s${slide.slide}.png`;
+          const filePath = path.join(outputDir, filename);
+          await page.screenshot({ path: filePath, type: 'png' });
+          const imageUrl = `/images/${planningId}/${filename}`;
+          if (!firstImageUrl) firstImageUrl = imageUrl;
+          generatedFiles.push({ id: piece.id, format: 'carrusel', slideIndex: slide.slide, imageUrl, filePath });
+          logger.info(`    ✓ ${filename}`);
+        }
+        // Guarda la portada (slide 1) como imageUrl del Content
+        if (firstImageUrl) await piece.update({ imageUrl: firstImageUrl });
+      }
+    }
+
+    await page.close();
+  } finally {
+    await browser.close();
+  }
+
+  logger.info(`Total generado: ${generatedFiles.length} archivos en ${outputDir}`);
+  return { generatedFiles, outputDir };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORIES – PLANTILLAS (1080×1920, formato vertical 9:16)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STORY_TEMPLATE_MAP = {
+  teaser: 'text', texto_reflexion: 'text', dato_curioso: 'text', tip_experto: 'text',
+  encuesta: 'interactive', pregunta: 'interactive', slider_emocional: 'interactive', quiz: 'interactive',
+  cta_directa: 'cta',
+  countdown: 'countdown',
+};
+
+// ── STORY TEXT (teaser, texto_reflexion, dato_curioso, tip_experto) ──────────
+function buildStoryTextHTML(story, client) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#9c8aa5';
+  const accent     = bi.accentColor  || '#5e4b63';
+  const textColor  = bi.textColor    || '#3a3a3a';
+  const lightColor = bi.lightColor   || '#eae3dc';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+  const mainText   = story.textContent || '';
+  const fontSize   = hookFontSize(mainText, 64, 36);
+  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml    = story.cta ? esc(story.cta) : '';
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  body{background:${lightColor};font-family:${bodyFF};color:${textColor};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:120px 80px;position:relative}
+  .accent-bar{position:absolute;left:0;top:0;bottom:0;width:6px;background:${accent}}
+  .accent-circle{position:absolute;width:400px;height:400px;border-radius:50%;
+    border:1.5px solid ${primary};opacity:0.08;top:180px;right:-100px}
+  .accent-circle-2{position:absolute;width:280px;height:280px;border-radius:50%;
+    border:1px solid ${accent};opacity:0.06;bottom:280px;left:-80px}
+  .logo{position:absolute;top:80px;left:50%;transform:translateX(-50%);
+    max-width:200px;max-height:80px;object-fit:contain;opacity:0.85}
+  .divider{width:60px;height:3px;background:${accent};margin-bottom:48px;border-radius:2px}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
+    line-height:1.5;color:${primary};text-align:center;max-width:900px;margin-bottom:48px}
+  .divider-b{width:60px;height:3px;background:${accent};margin-bottom:40px;border-radius:2px}
+  .cta-text{font-family:${bodyFF};font-size:24px;font-weight:600;color:${accent};
+    text-align:center;letter-spacing:0.5px;opacity:0.9}
+  .story-label{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+    font-family:${bodyFF};font-size:14px;letter-spacing:3px;text-transform:uppercase;
+    opacity:0.25;color:${textColor}}
+</style></head><body>
+  <div class="accent-bar"></div>
+  <div class="accent-circle"></div>
+  <div class="accent-circle-2"></div>
+  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <div class="divider"></div>
+  <div class="main-text">${textHtml}</div>
+  <div class="divider-b"></div>
+  ${ctaHtml ? `<div class="cta-text">${ctaHtml}</div>` : ''}
+  <div class="story-label">${esc(story.storyType).replace(/_/g, ' ')}</div>
+</body></html>`;
+}
+
+// ── STORY INTERACTIVE (encuesta, pregunta, slider_emocional, quiz) ──────────
+function buildStoryInteractiveHTML(story, client) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#9c8aa5';
+  const accent     = bi.accentColor  || '#5e4b63';
+  const lightColor = bi.lightColor   || '#eae3dc';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+  const mainText   = story.textContent || '';
+  const fontSize   = hookFontSize(mainText, 56, 34);
+  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
+  const stickerLabels = {
+    encuesta: 'Encuesta', pregunta: 'Caja de preguntas',
+    slider_emocional: 'Slider', quiz: 'Quiz',
+  };
+  const stickerLabel = stickerLabels[story.storyType] || '';
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  body{background:${primary};font-family:${bodyFF};color:${lightColor};
+    display:flex;flex-direction:column;padding:0;position:relative}
+  .top-zone{flex:0 0 60%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:100px 80px 40px;position:relative}
+  .bottom-zone{flex:0 0 40%;display:flex;flex-direction:column;
+    align-items:center;justify-content:flex-start;padding:20px 80px}
+  .accent-bar{position:absolute;right:0;top:0;bottom:0;width:6px;background:${accent}}
+  .accent-dots{position:absolute;top:60px;right:60px;display:flex;gap:8px}
+  .accent-dot{width:10px;height:10px;border-radius:50%;background:${lightColor};opacity:0.15}
+  .logo{max-width:160px;max-height:64px;object-fit:contain;margin-bottom:48px;opacity:0.8}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
+    line-height:1.5;color:${lightColor};text-align:center;max-width:880px}
+  .divider{width:80px;height:3px;background:${accent};margin:40px auto 0;border-radius:2px}
+  .sticker-zone{font-family:${bodyFF};font-size:18px;font-weight:600;letter-spacing:2px;
+    text-transform:uppercase;color:${lightColor};border:2px dashed ${lightColor};
+    border-radius:16px;padding:24px 40px;opacity:0.15}
+</style></head><body>
+  <div class="accent-bar"></div>
+  <div class="top-zone">
+    <div class="accent-dots"><div class="accent-dot"></div><div class="accent-dot"></div><div class="accent-dot"></div></div>
+    ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <div class="main-text">${textHtml}</div>
+    <div class="divider"></div>
+  </div>
+  <div class="bottom-zone">
+    <div class="sticker-zone">${esc(stickerLabel)}</div>
+  </div>
+</body></html>`;
+}
+
+// ── STORY CTA (cta_directa) ─────────────────────────────────────────────────
+function buildStoryCtaHTML(story, client) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#9c8aa5';
+  const accent     = bi.accentColor  || '#5e4b63';
+  const lightColor = bi.lightColor   || '#eae3dc';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+  const mainText   = story.textContent || '';
+  const fontSize   = hookFontSize(mainText, 58, 34);
+  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml    = esc(story.cta || 'Toca aquí');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  body{background:${accent};font-family:${bodyFF};color:${lightColor};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:140px 80px;position:relative}
+  .bg-gradient{position:absolute;inset:0;
+    background:linear-gradient(170deg, ${accent} 0%, ${primary} 100%);opacity:0.3}
+  .line-top{position:absolute;top:0;left:0;right:0;height:8px;background:${lightColor};opacity:0.1}
+  .line-bottom{position:absolute;bottom:0;left:0;right:0;height:8px;background:${lightColor};opacity:0.1}
+  .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%}
+  .logo{max-width:180px;max-height:72px;object-fit:contain;margin-bottom:80px;opacity:0.9}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
+    line-height:1.5;color:${lightColor};text-align:center;max-width:880px;margin-bottom:64px}
+  .cta-btn{background:${lightColor};color:${accent};padding:28px 72px;border-radius:60px;
+    font-family:${bodyFF};font-size:28px;font-weight:700;letter-spacing:0.5px;text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+  .swipe{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+    font-family:${bodyFF};font-size:16px;letter-spacing:3px;text-transform:uppercase;
+    opacity:0.3;color:${lightColor}}
+</style></head><body>
+  <div class="bg-gradient"></div>
+  <div class="line-top"></div>
+  <div class="line-bottom"></div>
+  <div class="content">
+    ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <div class="main-text">${textHtml}</div>
+    <div class="cta-btn">${ctaHtml}</div>
+  </div>
+  <div class="swipe">Desliza hacia arriba</div>
+</body></html>`;
+}
+
+// ── STORY COUNTDOWN ─────────────────────────────────────────────────────────
+function buildStoryCountdownHTML(story, client) {
+  const bi = client.brandIdentity || {};
+  const primary    = bi.primaryColor || '#9c8aa5';
+  const accent     = bi.accentColor  || '#5e4b63';
+  const textColor  = bi.textColor    || '#3a3a3a';
+  const lightColor = bi.lightColor   || '#eae3dc';
+  const titleFont  = bi.titleFont    || 'Georgia';
+  const bodyFont   = bi.bodyFont     || 'Arial';
+  const titleFF    = ff(titleFont, 'serif');
+  const bodyFF     = ff(bodyFont, 'sans');
+  const fontsImport = buildFontsImport(titleFont, bodyFont);
+  const logoSrc    = logoToDataUrl(client.logoUrl);
+  const mainText   = story.textContent || '';
+  const fontSize   = hookFontSize(mainText, 52, 32);
+  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml    = story.cta ? esc(story.cta) : '';
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  ${fontsImport}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  body{background:${lightColor};font-family:${bodyFF};color:${textColor};
+    display:flex;flex-direction:column;padding:0;position:relative}
+  .accent-bar{position:absolute;left:0;top:0;bottom:0;width:6px;background:${primary}}
+  .accent-bar-r{position:absolute;right:0;top:0;bottom:0;width:6px;background:${primary}}
+  .top-zone{flex:0 0 45%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:100px 80px 20px}
+  .mid-zone{flex:0 0 30%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px 80px}
+  .bot-zone{flex:0 0 25%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px 80px 80px}
+  .logo{max-width:180px;max-height:72px;object-fit:contain;margin-bottom:48px;opacity:0.85}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
+    line-height:1.5;color:${primary};text-align:center;max-width:880px}
+  .divider{width:60px;height:3px;background:${accent};margin:32px auto;border-radius:2px}
+  .countdown-ph{font-family:${bodyFF};font-size:16px;letter-spacing:2px;text-transform:uppercase;
+    color:${textColor};border:2px dashed ${primary};border-radius:16px;padding:32px 48px;
+    opacity:0.15;text-align:center}
+  .cta-text{font-family:${bodyFF};font-size:24px;font-weight:600;color:${accent};text-align:center}
+</style></head><body>
+  <div class="accent-bar"></div>
+  <div class="accent-bar-r"></div>
+  <div class="top-zone">
+    ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <div class="main-text">${textHtml}</div>
+  </div>
+  <div class="mid-zone">
+    <div class="divider"></div>
+    <div class="countdown-ph">Countdown sticker</div>
+  </div>
+  <div class="bot-zone">
+    ${ctaHtml ? `<div class="cta-text">${ctaHtml}</div>` : ''}
+  </div>
+</body></html>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FUNCIÓN PRINCIPAL PARA STORIES
+// ─────────────────────────────────────────────────────────────────────────────
+async function generateStoryImages(planningId) {
+  const planning = await Planning.findByPk(planningId, {
+    include: [{ model: Client, as: 'client' }],
+  });
+  if (!planning) throw new Error('Planeación no encontrada');
+
+  const Story = require('../modules/stories/story.model');
+
+  const stories = await Story.findAll({
+    where: { planning_id: planningId },
+    order: [['day_of_week', 'ASC'], ['order', 'ASC']],
+  });
+
+  const client = planning.client;
+  const outputDir = path.join(OUTPUT_BASE, `${planningId}_stories`);
+  ensureDir(outputDir);
+
+  // Solo stories NO grabadas generan imagen
+  const imageable = stories.filter(s => !s.isRecorded);
+  logger.info(`Generando imágenes de stories para planning ${planningId} — ${imageable.length} stories (grabadas excluidas)`);
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  });
+
+  const generatedFiles = [];
+
+  try {
+    const page = await browser.newPage();
+
+    for (const story of imageable) {
+      const templateType = STORY_TEMPLATE_MAP[story.storyType] || 'text';
+      let html;
+
+      switch (templateType) {
+        case 'interactive': html = buildStoryInteractiveHTML(story, client); break;
+        case 'cta':         html = buildStoryCtaHTML(story, client); break;
+        case 'countdown':   html = buildStoryCountdownHTML(story, client); break;
+        default:            html = buildStoryTextHTML(story, client); break;
+      }
+
+      await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
+      await page.evaluate(() => document.fonts.ready);
+
+      const filename = `story_d${story.dayOfWeek}_${story.order}.png`;
+      const filePath = path.join(outputDir, filename);
+      await page.screenshot({ path: filePath, type: 'png' });
+
+      const imageUrl = `/images/${planningId}_stories/${filename}`;
+      await story.update({ imageUrl });
+
+      generatedFiles.push({ id: story.id, format: 'story', imageUrl, filePath });
+      logger.info(`  ✓ ${filename} (${story.storyType} → ${templateType})`);
+    }
+
+    await page.close();
+  } finally {
+    await browser.close();
+  }
+
+  logger.info(`Total: ${generatedFiles.length} imágenes de stories en ${outputDir}`);
+  return { generatedFiles, outputDir };
+}
+
+module.exports = { generateImages, generateStoryImages };

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PGPASSWORD=admin123 /d/PostgreSQL/17/bin/psql.exe:*)"
+    ]
+  }
+}

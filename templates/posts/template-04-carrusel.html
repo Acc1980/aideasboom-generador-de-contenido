@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template 04 — Carruseles</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    font-family: 'Raleway', sans-serif;
+    color: #e8e6e1;
+    padding: 40px;
+  }
+
+  h1.page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 300;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  h1.page-title em { color: #b88d74; font-weight: 400; }
+
+  .page-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #8fa394;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-bottom: 50px;
+  }
+
+  .carousel-section {
+    margin-bottom: 80px;
+  }
+
+  .carousel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .carousel-desc {
+    font-size: 14px;
+    text-align: center;
+    opacity: 0.4;
+    font-weight: 300;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+  }
+
+  .slides-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 0 20px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .slides-row::-webkit-scrollbar {
+    height: 4px;
+  }
+  .slides-row::-webkit-scrollbar-track {
+    background: rgba(232,230,225,0.05);
+    border-radius: 2px;
+  }
+  .slides-row::-webkit-scrollbar-thumb {
+    background: rgba(184,141,116,0.3);
+    border-radius: 2px;
+  }
+
+  .slide {
+    width: 340px;
+    height: 340px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .slide-number {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.3;
+    z-index: 2;
+  }
+
+  .section-divider {
+    width: 50px;
+    height: 1px;
+    background: #b88d74;
+    margin: 0 auto 60px;
+    opacity: 0.25;
+  }
+
+  /* =============================================
+     CARRUSEL A — Frase Desglosada
+     Cada slide revela una línea de la reflexión
+     ============================================= */
+
+  .ca-slide {
+    background: #e8e6e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .ca-slide .slide-number { color: #2c2c2c; }
+
+  /* Portada */
+  .ca-cover .top-line {
+    width: 30px;
+    height: 2px;
+    background: #b88d74;
+    margin-bottom: 28px;
+    opacity: 0.6;
+  }
+
+  .ca-cover .cover-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.4;
+  }
+
+  .ca-cover .cover-phrase em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .ca-cover .swipe-hint {
+    font-size: 10px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 28px;
+    font-weight: 400;
+  }
+
+  /* Slides intermedios de frase */
+  .ca-phrase-slide {
+    position: relative;
+  }
+
+  .ca-phrase-slide .side-accent {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 60px;
+    background: #b88d74;
+    opacity: 0.25;
+  }
+
+  .ca-phrase-slide .phrase-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.5;
+    padding: 0 50px;
+  }
+
+  .ca-phrase-slide .phrase-line em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .ca-phrase-slide .context {
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    color: #2c2c2c;
+    opacity: 0.4;
+    margin-top: 16px;
+    letter-spacing: 1px;
+    font-weight: 300;
+  }
+
+  /* Cierre */
+  .ca-close .divider-line {
+    width: 35px;
+    height: 1px;
+    background: #b88d74;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .ca-close .close-text {
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    color: #2c2c2c;
+    line-height: 1.8;
+    font-weight: 300;
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+  }
+
+  .ca-close .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    margin-top: 20px;
+    font-weight: 500;
+  }
+
+  /* =============================================
+     CARRUSEL B — Mini Guía / Tips
+     Portada + slides con insights + CTA final
+     ============================================= */
+
+  .cb-slide {
+    background: #2c2c2c;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    position: relative;
+  }
+
+  .cb-slide .slide-number { color: #e8e6e1; }
+
+  /* Glow decorativo sutil */
+  .cb-slide .glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .cb-slide .glow-tl {
+    top: -60px;
+    left: -60px;
+    background: radial-gradient(ellipse, rgba(143,163,148,0.08) 0%, transparent 70%);
+  }
+
+  .cb-slide .glow-br {
+    bottom: -60px;
+    right: -60px;
+    background: radial-gradient(ellipse, rgba(184,141,116,0.06) 0%, transparent 70%);
+  }
+
+  /* Portada guía */
+  .cb-cover .tag {
+    display: inline-block;
+    border: 1px solid rgba(143,163,148,0.4);
+    color: #8fa394;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-cover .cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.35;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-cover .cover-title em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cb-cover .cover-sub {
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    opacity: 0.4;
+    margin-top: 18px;
+    letter-spacing: 1px;
+    font-weight: 300;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Slide de tip */
+  .cb-tip .tip-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: #b88d74;
+    opacity: 0.4;
+    line-height: 1;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-tip .tip-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.35;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-tip .tip-title em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cb-tip .tip-divider {
+    width: 25px;
+    height: 1px;
+    background: #b88d74;
+    margin: 0 auto 14px;
+    opacity: 0.4;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-tip .tip-body {
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    color: #e8e6e1;
+    opacity: 0.55;
+    line-height: 1.8;
+    font-weight: 300;
+    max-width: 260px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CTA final */
+  .cb-cta .cta-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.4;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-cta .cta-phrase em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cb-cta .cta-button {
+    display: inline-block;
+    border: 1px solid rgba(184,141,116,0.5);
+    color: #b88d74;
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cb-cta .handle {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    color: #8fa394;
+    letter-spacing: 1.5px;
+    margin-top: 18px;
+    opacity: 0.6;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* =============================================
+     CARRUSEL C — Storytelling / Reflexión
+     Alternancia claro-oscuro slide a slide
+     ============================================= */
+
+  .cc-light {
+    background: #e8e6e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 44px;
+  }
+
+  .cc-light .slide-number { color: #2c2c2c; }
+
+  .cc-dark {
+    background: #2c2c2c;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 44px;
+  }
+
+  .cc-dark .slide-number { color: #e8e6e1; }
+
+  .cc-green {
+    background: #8fa394;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 44px;
+  }
+
+  .cc-green .slide-number { color: #e8e6e1; }
+
+  /* Texto en slides claros */
+  .cc-light .story-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+
+  .cc-light .story-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cc-light .story-small {
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    color: #2c2c2c;
+    opacity: 0.45;
+    margin-top: 16px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* Texto en slides oscuros */
+  .cc-dark .story-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.5;
+  }
+
+  .cc-dark .story-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cc-dark .story-small {
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    opacity: 0.4;
+    margin-top: 16px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* Texto en slides verdes */
+  .cc-green .story-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.5;
+  }
+
+  .cc-green .story-text em {
+    color: #2c2c2c;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cc-green .brand-close {
+    margin-top: 24px;
+  }
+
+  .cc-green .divider-line {
+    width: 30px;
+    height: 1px;
+    background: #e8e6e1;
+    margin: 0 auto 12px;
+    opacity: 0.4;
+  }
+
+  .cc-green .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    font-weight: 400;
+  }
+
+  /* Decorador para slides de storytelling */
+  .cc-deco-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #b88d74;
+    opacity: 0.3;
+    margin-bottom: 20px;
+  }
+
+  .cc-deco-line {
+    width: 30px;
+    height: 1px;
+    background: #b88d74;
+    opacity: 0.35;
+    margin-bottom: 20px;
+  }
+
+  /* =============================================
+     CARRUSEL D — Mito vs Realidad
+     Split horizontal: mito (oscuro) vs realidad (claro)
+     ============================================= */
+
+  .cd-slide {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .cd-slide .slide-number { color: #e8e6e1; }
+
+  /* Portada */
+  .cd-cover {
+    background: #2c2c2c;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .cd-cover .vs-icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #b88d74;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0.6;
+  }
+
+  .cd-cover .cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.4;
+  }
+
+  .cd-cover .cover-title em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cd-cover .cover-sub {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    margin-top: 22px;
+    text-transform: uppercase;
+  }
+
+  /* Slide split mito/realidad */
+  .cd-split {
+    flex-direction: row;
+  }
+
+  .cd-split .half {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px 24px;
+  }
+
+  .cd-split .half-mito {
+    background: #2c2c2c;
+  }
+
+  .cd-split .half-realidad {
+    background: #e8e6e1;
+  }
+
+  .cd-split .half-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .cd-split .half-mito .half-label {
+    color: #e8e6e1;
+    opacity: 0.35;
+  }
+
+  .cd-split .half-realidad .half-label {
+    color: #8fa394;
+    opacity: 0.7;
+  }
+
+  .cd-split .half-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.45;
+  }
+
+  .cd-split .half-mito .half-text {
+    color: #e8e6e1;
+    opacity: 0.6;
+    text-decoration: line-through;
+    text-decoration-color: rgba(184,141,116,0.4);
+  }
+
+  .cd-split .half-realidad .half-text {
+    color: #2c2c2c;
+  }
+
+  .cd-split .half-realidad .half-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cd-split .half-divider {
+    width: 20px;
+    height: 1px;
+    margin: 12px auto 0;
+    opacity: 0.3;
+  }
+
+  .cd-split .half-mito .half-divider { background: #b88d74; }
+  .cd-split .half-realidad .half-divider { background: #8fa394; }
+
+  /* Cierre mito/realidad */
+  .cd-close {
+    background: #8fa394;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .cd-close .slide-number { color: #e8e6e1; }
+
+  .cd-close .close-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.45;
+  }
+
+  .cd-close .close-phrase em {
+    color: #2c2c2c;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cd-close .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    letter-spacing: 2px;
+    margin-top: 22px;
+    opacity: 0.55;
+  }
+
+  /* =============================================
+     CARRUSEL E — Antes y Después
+     Transformación: "Antes creía..." / "Hoy elijo..."
+     ============================================= */
+
+  .ce-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 44px;
+    position: relative;
+  }
+
+  /* Portada */
+  .ce-cover {
+    background: linear-gradient(135deg, #2c2c2c 50%, #e8e6e1 50%);
+  }
+
+  .ce-cover .slide-number { color: #e8e6e1; }
+
+  .ce-cover .cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 20px rgba(44,44,44,0.5);
+  }
+
+  .ce-cover .cover-title em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .ce-cover .arrow-icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: #b88d74;
+    margin: 16px 0;
+    opacity: 0.6;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ce-cover .cover-sub {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    color: #e8e6e1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.5;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Slide "Antes" */
+  .ce-antes {
+    background: #2c2c2c;
+  }
+
+  .ce-antes .slide-number { color: #e8e6e1; }
+
+  .ce-antes .phase-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #e8e6e1;
+    opacity: 0.3;
+    margin-bottom: 18px;
+  }
+
+  .ce-antes .phase-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.45;
+    opacity: 0.7;
+  }
+
+  .ce-antes .phase-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+    opacity: 1;
+  }
+
+  .ce-antes .phase-line {
+    width: 25px;
+    height: 1px;
+    background: #b88d74;
+    margin-top: 18px;
+    opacity: 0.3;
+  }
+
+  /* Slide "Hoy" */
+  .ce-hoy {
+    background: #e8e6e1;
+  }
+
+  .ce-hoy .slide-number { color: #2c2c2c; }
+
+  .ce-hoy .phase-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8fa394;
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+
+  .ce-hoy .phase-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.45;
+  }
+
+  .ce-hoy .phase-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .ce-hoy .phase-line {
+    width: 25px;
+    height: 1px;
+    background: #8fa394;
+    margin-top: 18px;
+    opacity: 0.4;
+  }
+
+  /* Cierre antes/después */
+  .ce-close {
+    background: #8fa394;
+  }
+
+  .ce-close .slide-number { color: #e8e6e1; }
+
+  .ce-close .close-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.45;
+  }
+
+  .ce-close .close-phrase em {
+    color: #2c2c2c;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .ce-close .close-divider {
+    width: 30px;
+    height: 1px;
+    background: #e8e6e1;
+    margin: 20px auto;
+    opacity: 0.35;
+  }
+
+  .ce-close .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    letter-spacing: 2px;
+    opacity: 0.55;
+  }
+
+  /* =============================================
+     CARRUSEL F — Preguntas Poderosas
+     Cada slide = una pregunta reflexiva grande
+     ============================================= */
+
+  .cf-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 44px;
+    position: relative;
+  }
+
+  /* Portada */
+  .cf-cover {
+    background: #e8e6e1;
+  }
+
+  .cf-cover .slide-number { color: #2c2c2c; }
+
+  .cf-cover .question-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 80px;
+    font-weight: 300;
+    color: #b88d74;
+    opacity: 0.2;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .cf-cover .cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.4;
+  }
+
+  .cf-cover .cover-title em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cf-cover .cover-sub {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 20px;
+  }
+
+  /* Slides de preguntas */
+  .cf-question {
+    position: relative;
+  }
+
+  .cf-question .bg-mark {
+    position: absolute;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 200px;
+    font-weight: 300;
+    line-height: 1;
+    opacity: 0.04;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cf-q-light {
+    background: #e8e6e1;
+  }
+  .cf-q-light .slide-number { color: #2c2c2c; }
+  .cf-q-light .bg-mark { color: #2c2c2c; }
+
+  .cf-q-dark {
+    background: #2c2c2c;
+  }
+  .cf-q-dark .slide-number { color: #e8e6e1; }
+  .cf-q-dark .bg-mark { color: #e8e6e1; }
+
+  .cf-question .q-number {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cf-q-light .q-number { color: #2c2c2c; }
+  .cf-q-dark .q-number { color: #e8e6e1; }
+
+  .cf-question .q-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cf-q-light .q-text { color: #2c2c2c; }
+  .cf-q-dark .q-text { color: #e8e6e1; }
+
+  .cf-question .q-text em {
+    color: #b88d74;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cf-question .q-hint {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-top: 20px;
+    font-weight: 300;
+    font-style: italic;
+    opacity: 0.4;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cf-q-light .q-hint { color: #2c2c2c; }
+  .cf-q-dark .q-hint { color: #e8e6e1; }
+
+  /* Cierre preguntas */
+  .cf-close {
+    background: #8fa394;
+  }
+
+  .cf-close .slide-number { color: #e8e6e1; }
+
+  .cf-close .close-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #e8e6e1;
+    line-height: 1.45;
+  }
+
+  .cf-close .close-phrase em {
+    color: #2c2c2c;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .cf-close .close-cta {
+    display: inline-block;
+    border: 1px solid rgba(232,230,225,0.4);
+    color: #e8e6e1;
+    font-family: 'Raleway', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    margin-top: 22px;
+  }
+
+  .cf-close .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #e8e6e1;
+    letter-spacing: 2px;
+    margin-top: 16px;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Carruseles — <em>Reconociendo mi esencia</em></h1>
+<p class="page-subtitle">6 estilos de carrusel · slides 1080 × 1080</p>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL A — Frase Desglosada
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">A — Frase Desglosada</h2>
+  <p class="carousel-desc">Una reflexión poderosa revelada línea por línea · 5 slides</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Portada -->
+    <div class="slide ca-slide ca-cover">
+      <span class="slide-number">1 / 5</span>
+      <div class="top-line"></div>
+      <p class="cover-phrase">
+        No viniste a<br>
+        <em>encajar.</em>
+      </p>
+      <span class="swipe-hint">Desliza →</span>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide ca-slide ca-phrase-slide">
+      <span class="slide-number">2 / 5</span>
+      <div class="side-accent"></div>
+      <p class="phrase-line">
+        Viniste a <em>recordar</em><br>
+        quién eres.
+      </p>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide ca-slide ca-phrase-slide">
+      <span class="slide-number">3 / 5</span>
+      <div class="side-accent"></div>
+      <p class="phrase-line">
+        A <em>habitar</em> tu cuerpo,<br>
+        tu historia,<br>
+        tu voz.
+      </p>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide ca-slide ca-phrase-slide">
+      <span class="slide-number">4 / 5</span>
+      <div class="side-accent"></div>
+      <p class="phrase-line">
+        A dejar de pedir<br>
+        <em>permiso</em> para ser<br>
+        quien ya eres.
+      </p>
+    </div>
+
+    <!-- Slide 5: Cierre -->
+    <div class="slide ca-slide ca-close">
+      <span class="slide-number">5 / 5</span>
+      <div class="divider-line"></div>
+      <p class="close-text">
+        Mirada sistémica para mujeres<br>
+        que quieren vivir en coherencia.
+      </p>
+      <span class="brand-mark">@monicagrizales</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL B — Mini Guía / Tips
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">B — Mini Guía</h2>
+  <p class="carousel-desc">Portada + 3 insights + CTA · 5 slides · fondo oscuro</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Portada -->
+    <div class="slide cb-slide cb-cover">
+      <div class="glow glow-tl"></div>
+      <div class="glow glow-br"></div>
+      <span class="slide-number">1 / 5</span>
+      <span class="tag">Mirada Sistémica</span>
+      <p class="cover-title">
+        3 señales de que<br>
+        estás cargando lo<br>
+        que <em>no te pertenece</em>
+      </p>
+      <span class="cover-sub">Desliza para descubrir →</span>
+    </div>
+
+    <!-- Slide 2: Tip 1 -->
+    <div class="slide cb-slide cb-tip">
+      <div class="glow glow-tl"></div>
+      <div class="glow glow-br"></div>
+      <span class="slide-number">2 / 5</span>
+      <div class="tip-number">01</div>
+      <p class="tip-title">Sientes una <em>culpa</em><br>que no puedes explicar</p>
+      <div class="tip-divider"></div>
+      <p class="tip-body">Una culpa que aparece cuando eliges por ti, cuando dices que no, cuando te permites estar bien.</p>
+    </div>
+
+    <!-- Slide 3: Tip 2 -->
+    <div class="slide cb-slide cb-tip">
+      <div class="glow glow-tl"></div>
+      <div class="glow glow-br"></div>
+      <span class="slide-number">3 / 5</span>
+      <div class="tip-number">02</div>
+      <p class="tip-title">Te cuesta <em>recibir</em><br>sin sentir que debes algo</p>
+      <div class="tip-divider"></div>
+      <p class="tip-body">Si recibir te genera incomodidad, es posible que estés repitiendo una dinámica que no es tuya.</p>
+    </div>
+
+    <!-- Slide 4: Tip 3 -->
+    <div class="slide cb-slide cb-tip">
+      <div class="glow glow-tl"></div>
+      <div class="glow glow-br"></div>
+      <span class="slide-number">4 / 5</span>
+      <div class="tip-number">03</div>
+      <p class="tip-title">Tu cuerpo <em>habla</em><br>lo que tú callas</p>
+      <div class="tip-divider"></div>
+      <p class="tip-body">El cuerpo guarda lo que la mente no puede procesar. Tu síntoma puede ser un mensaje del sistema.</p>
+    </div>
+
+    <!-- Slide 5: CTA -->
+    <div class="slide cb-slide cb-cta">
+      <div class="glow glow-tl"></div>
+      <div class="glow glow-br"></div>
+      <span class="slide-number">5 / 5</span>
+      <p class="cta-phrase">
+        ¿Te identificaste<br>
+        con alguna <em>señal?</em>
+      </p>
+      <span class="cta-button">Escríbeme por DM</span>
+      <span class="handle">@monicagrizales</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL C — Storytelling / Reflexión
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">C — Storytelling</h2>
+  <p class="carousel-desc">Narrativa que alterna claro y oscuro · 6 slides</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Apertura (claro) -->
+    <div class="slide cc-light">
+      <span class="slide-number">1 / 6</span>
+      <div class="cc-deco-dot"></div>
+      <p class="story-text">
+        Creciste creyendo que<br>
+        ser <em>buena</em> era<br>
+        ser invisible.
+      </p>
+    </div>
+
+    <!-- Slide 2 (oscuro) -->
+    <div class="slide cc-dark">
+      <span class="slide-number">2 / 6</span>
+      <div class="cc-deco-line"></div>
+      <p class="story-text">
+        Que tu valor dependía<br>
+        de cuánto <em>dabas</em><br>
+        sin pedir nada.
+      </p>
+    </div>
+
+    <!-- Slide 3 (claro) -->
+    <div class="slide cc-light">
+      <span class="slide-number">3 / 6</span>
+      <div class="cc-deco-dot"></div>
+      <p class="story-text">
+        Y un día te cansaste.<br>
+        No del mundo,<br>
+        sino de <em>ti misma</em><br>
+        fingiendo.
+      </p>
+    </div>
+
+    <!-- Slide 4 (oscuro) -->
+    <div class="slide cc-dark">
+      <span class="slide-number">4 / 6</span>
+      <div class="cc-deco-line"></div>
+      <p class="story-text">
+        Ese cansancio<br>
+        no es <em>debilidad.</em>
+      </p>
+      <p class="story-small">Es tu sistema pidiendo verdad.</p>
+    </div>
+
+    <!-- Slide 5 (claro) -->
+    <div class="slide cc-light">
+      <span class="slide-number">5 / 6</span>
+      <div class="cc-deco-dot"></div>
+      <p class="story-text">
+        Reconocerte<br>
+        es el primer acto<br>
+        de <em>amor propio.</em>
+      </p>
+    </div>
+
+    <!-- Slide 6: Cierre (verde) -->
+    <div class="slide cc-green">
+      <span class="slide-number">6 / 6</span>
+      <p class="story-text">
+        No necesitas ser<br>
+        <em>otra.</em><br>
+        Necesitas volver<br>
+        a ti.
+      </p>
+      <div class="brand-close">
+        <div class="divider-line"></div>
+        <span class="brand-name">@monicagrizales</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL D — Mito vs Realidad
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">D — Mito vs Realidad</h2>
+  <p class="carousel-desc">Desmonta creencias con split visual · 6 slides</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Portada -->
+    <div class="slide cd-slide cd-cover">
+      <span class="slide-number">1 / 6</span>
+      <div class="vs-icon">mito vs realidad</div>
+      <p class="cover-title">
+        Lo que te enseñaron<br>
+        vs. lo que es <em>verdad</em>
+      </p>
+      <span class="cover-sub">Desliza →</span>
+    </div>
+
+    <!-- Slide 2: Mito 1 -->
+    <div class="slide cd-slide cd-split">
+      <span class="slide-number">2 / 6</span>
+      <div class="half half-mito">
+        <span class="half-label">Mito</span>
+        <p class="half-text">Ser fuerte es<br>no llorar</p>
+        <div class="half-divider"></div>
+      </div>
+      <div class="half half-realidad">
+        <span class="half-label">Realidad</span>
+        <p class="half-text">Ser fuerte es<br><em>permitirte sentir</em></p>
+        <div class="half-divider"></div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Mito 2 -->
+    <div class="slide cd-slide cd-split">
+      <span class="slide-number">3 / 6</span>
+      <div class="half half-mito">
+        <span class="half-label">Mito</span>
+        <p class="half-text">Si digo que no,<br>soy egoísta</p>
+        <div class="half-divider"></div>
+      </div>
+      <div class="half half-realidad">
+        <span class="half-label">Realidad</span>
+        <p class="half-text">Decir que no es<br>un acto de <em>amor propio</em></p>
+        <div class="half-divider"></div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Mito 3 -->
+    <div class="slide cd-slide cd-split">
+      <span class="slide-number">4 / 6</span>
+      <div class="half half-mito">
+        <span class="half-label">Mito</span>
+        <p class="half-text">Buena hija =<br>hija obediente</p>
+        <div class="half-divider"></div>
+      </div>
+      <div class="half half-realidad">
+        <span class="half-label">Realidad</span>
+        <p class="half-text">Buena hija =<br>hija que <em>honra su verdad</em></p>
+        <div class="half-divider"></div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Mito 4 -->
+    <div class="slide cd-slide cd-split">
+      <span class="slide-number">5 / 6</span>
+      <div class="half half-mito">
+        <span class="half-label">Mito</span>
+        <p class="half-text">Pedir ayuda es<br>ser débil</p>
+        <div class="half-divider"></div>
+      </div>
+      <div class="half half-realidad">
+        <span class="half-label">Realidad</span>
+        <p class="half-text">Pedir ayuda es<br><em>reconocerte humana</em></p>
+        <div class="half-divider"></div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Cierre -->
+    <div class="slide cd-slide cd-close">
+      <span class="slide-number">6 / 6</span>
+      <p class="close-phrase">
+        Cuestionar lo que<br>
+        te enseñaron es el<br>
+        primer paso para<br>
+        <em>vivir en coherencia.</em>
+      </p>
+      <span class="brand-mark">@monicagrizales</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL E — Antes y Después
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">E — Antes y Después</h2>
+  <p class="carousel-desc">Transformación personal: "Antes creía..." → "Hoy elijo..." · 7 slides</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Portada -->
+    <div class="slide ce-slide ce-cover">
+      <span class="slide-number">1 / 7</span>
+      <p class="cover-title">
+        Lo que <em>antes</em> creía<br>
+        vs. lo que <em>hoy</em> elijo
+      </p>
+      <div class="arrow-icon">↓</div>
+      <span class="cover-sub">Mi camino de vuelta a mí</span>
+    </div>
+
+    <!-- Slide 2: Antes 1 -->
+    <div class="slide ce-slide ce-antes">
+      <span class="slide-number">2 / 7</span>
+      <span class="phase-label">Antes creía que...</span>
+      <p class="phase-text">
+        Mi valor dependía<br>
+        de cuánto <em>hacía</em><br>
+        por los demás.
+      </p>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- Slide 3: Hoy 1 -->
+    <div class="slide ce-slide ce-hoy">
+      <span class="slide-number">3 / 7</span>
+      <span class="phase-label">Hoy elijo...</span>
+      <p class="phase-text">
+        Saber que mi valor<br>
+        no depende de lo que<br>
+        <em>doy</em>, sino de lo que <em>soy.</em>
+      </p>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- Slide 4: Antes 2 -->
+    <div class="slide ce-slide ce-antes">
+      <span class="slide-number">4 / 7</span>
+      <span class="phase-label">Antes creía que...</span>
+      <p class="phase-text">
+        Si me alejaba del<br>
+        <em>dolor familiar</em>,<br>
+        los traicionaba.
+      </p>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- Slide 5: Hoy 2 -->
+    <div class="slide ce-slide ce-hoy">
+      <span class="slide-number">5 / 7</span>
+      <span class="phase-label">Hoy elijo...</span>
+      <p class="phase-text">
+        Amar a mi familia<br>
+        sin <em>cargar</em> lo que<br>
+        no me corresponde.
+      </p>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- Slide 6: Antes 3 -->
+    <div class="slide ce-slide ce-antes">
+      <span class="slide-number">6 / 7</span>
+      <span class="phase-label">Antes creía que...</span>
+      <p class="phase-text">
+        Estar bien mientras<br>
+        otros sufren era<br>
+        <em>no merecer.</em>
+      </p>
+      <div class="phase-line"></div>
+    </div>
+
+    <!-- Slide 7: Cierre -->
+    <div class="slide ce-slide ce-close">
+      <span class="slide-number">7 / 7</span>
+      <p class="close-phrase">
+        Hoy elijo<br>
+        <em>reconocerme</em>,<br>
+        soltar lo que no es mío<br>
+        y habitar mi vida.
+      </p>
+      <div class="close-divider"></div>
+      <span class="brand-mark">@monicagrizales</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==========================================
+     CARRUSEL F — Preguntas Poderosas
+     ========================================== -->
+<section class="carousel-section">
+  <h2 class="carousel-title">F — Preguntas Poderosas</h2>
+  <p class="carousel-desc">Cada slide invita a la introspección · 7 slides</p>
+
+  <div class="slides-row">
+    <!-- Slide 1: Portada -->
+    <div class="slide cf-slide cf-cover">
+      <span class="slide-number">1 / 7</span>
+      <div class="question-mark">?</div>
+      <p class="cover-title">
+        5 preguntas que<br>
+        <em>nadie</em> te hizo
+      </p>
+      <span class="cover-sub">Tómate un momento →</span>
+    </div>
+
+    <!-- Slide 2: Pregunta 1 (claro) -->
+    <div class="slide cf-slide cf-question cf-q-light">
+      <span class="slide-number">2 / 7</span>
+      <span class="bg-mark">?</span>
+      <span class="q-number">01</span>
+      <p class="q-text">
+        ¿Qué cargas que<br>
+        <em>no es tuyo?</em>
+      </p>
+      <span class="q-hint">Respira antes de responder.</span>
+    </div>
+
+    <!-- Slide 3: Pregunta 2 (oscuro) -->
+    <div class="slide cf-slide cf-question cf-q-dark">
+      <span class="slide-number">3 / 7</span>
+      <span class="bg-mark">?</span>
+      <span class="q-number">02</span>
+      <p class="q-text">
+        ¿A quién le estás<br>
+        pidiendo <em>permiso</em><br>
+        para vivir?
+      </p>
+    </div>
+
+    <!-- Slide 4: Pregunta 3 (claro) -->
+    <div class="slide cf-slide cf-question cf-q-light">
+      <span class="slide-number">4 / 7</span>
+      <span class="bg-mark">?</span>
+      <span class="q-number">03</span>
+      <p class="q-text">
+        ¿Qué necesitaste<br>
+        escuchar de niña<br>
+        que <em>aún esperas?</em>
+      </p>
+    </div>
+
+    <!-- Slide 5: Pregunta 4 (oscuro) -->
+    <div class="slide cf-slide cf-question cf-q-dark">
+      <span class="slide-number">5 / 7</span>
+      <span class="bg-mark">?</span>
+      <span class="q-number">04</span>
+      <p class="q-text">
+        ¿Cuándo fue la<br>
+        última vez que elegiste<br>
+        por <em>ti misma?</em>
+      </p>
+    </div>
+
+    <!-- Slide 6: Pregunta 5 (claro) -->
+    <div class="slide cf-slide cf-question cf-q-light">
+      <span class="slide-number">6 / 7</span>
+      <span class="bg-mark">?</span>
+      <span class="q-number">05</span>
+      <p class="q-text">
+        Si hoy pudieras<br>
+        <em>soltar</em> una creencia,<br>
+        ¿cuál sería?
+      </p>
+      <span class="q-hint">Escríbela en los comentarios.</span>
+    </div>
+
+    <!-- Slide 7: Cierre -->
+    <div class="slide cf-slide cf-close">
+      <span class="slide-number">7 / 7</span>
+      <p class="close-phrase">
+        Las preguntas correctas<br>
+        no buscan respuestas.<br>
+        Buscan <em>verdad.</em>
+      </p>
+      <span class="close-cta">Guarda este carrusel</span>
+      <span class="brand-mark">@monicagrizales</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

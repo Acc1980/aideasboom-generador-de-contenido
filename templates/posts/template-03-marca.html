@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template 03 — Marca / Identidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    padding: 40px;
+    flex-wrap: wrap;
+  }
+  .label {
+    color: #e8e6e1;
+    font-family: 'Raleway', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* ========== FEED 1080x1080 ========== */
+  .feed {
+    width: 540px;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Fondo dividido: mitad sage green, mitad crema */
+    background: linear-gradient(to bottom, #8fa394 0%, #8fa394 45%, #e8e6e1 45%, #e8e6e1 100%);
+  }
+
+  /* Overlay sutil en la parte verde */
+  .feed .texture-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    background: linear-gradient(135deg, rgba(44,44,44,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .feed .top-zone {
+    height: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .feed .infinity-large {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    color: #e8e6e1;
+    opacity: 0.7;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .feed .brand-name-main {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: #e8e6e1;
+    font-weight: 400;
+    letter-spacing: 2px;
+    line-height: 1.3;
+  }
+
+  .feed .brand-name-main em {
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .feed .bottom-zone {
+    height: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px 70px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .feed .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: #2c2c2c;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .feed .tagline em {
+    font-style: italic;
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .feed .services-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .feed .service-pill {
+    font-family: 'Raleway', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #2c2c2c;
+    border: 1px solid rgba(44,44,44,0.2);
+    padding: 6px 16px;
+    font-weight: 400;
+  }
+
+  .feed .handle-bottom {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    color: #8fa394;
+    letter-spacing: 1.5px;
+    margin-top: 20px;
+    font-weight: 400;
+  }
+
+  /* ========== STORY 1080x1920 ========== */
+  .story {
+    width: 304px;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #e8e6e1;
+  }
+
+  /* Bloque de color superior */
+  .story .color-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 38%;
+    background: #8fa394;
+  }
+
+  /* Acento diagonal decorativo */
+  .story .diagonal-accent {
+    position: absolute;
+    top: 34%;
+    left: -20px;
+    width: 140%;
+    height: 60px;
+    background: #b88d74;
+    transform: rotate(-3deg);
+    opacity: 0.12;
+    pointer-events: none;
+  }
+
+  .story .top-zone {
+    height: 38%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .story .infinity-large {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    color: #e8e6e1;
+    opacity: 0.7;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .story .brand-name-main {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: #e8e6e1;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    line-height: 1.3;
+  }
+
+  .story .brand-name-main em {
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .story .bottom-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 30px 30px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .story .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: #2c2c2c;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0.2px;
+  }
+
+  .story .tagline em {
+    font-style: italic;
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .story .services-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+    align-items: center;
+  }
+
+  .story .service-pill {
+    font-family: 'Raleway', sans-serif;
+    font-size: 7px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #2c2c2c;
+    border: 1px solid rgba(44,44,44,0.2);
+    padding: 5px 14px;
+    font-weight: 400;
+  }
+
+  .story .handle-bottom {
+    font-family: 'Raleway', sans-serif;
+    font-size: 8px;
+    color: #8fa394;
+    letter-spacing: 1.5px;
+    margin-top: 16px;
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<!-- FEED VERSION -->
+<div>
+  <div class="label">Feed — 1080 × 1080</div>
+  <div class="feed">
+    <div class="texture-overlay"></div>
+
+    <div class="top-zone">
+      <div class="infinity-large">∞</div>
+      <div class="brand-name-main">Reconociendo<br><em>mi esencia</em></div>
+    </div>
+
+    <div class="bottom-zone">
+      <p class="tagline">
+        Mirada sistémica para<br>
+        mujeres que quieren<br>
+        vivir en <em>coherencia.</em>
+      </p>
+      <div class="services-row">
+        <span class="service-pill">Constelaciones</span>
+        <span class="service-pill">Terapia Sistémica</span>
+        <span class="service-pill">Talleres</span>
+      </div>
+      <p class="handle-bottom">@monicagrizales</p>
+    </div>
+  </div>
+</div>
+
+<!-- STORY VERSION -->
+<div>
+  <div class="label">Story — 1080 × 1920</div>
+  <div class="story">
+    <div class="color-block"></div>
+    <div class="diagonal-accent"></div>
+
+    <div class="top-zone">
+      <div class="infinity-large">∞</div>
+      <div class="brand-name-main">Reconociendo<br><em>mi esencia</em></div>
+    </div>
+
+    <div class="bottom-zone">
+      <p class="tagline">
+        Mirada sistémica para<br>
+        mujeres que quieren<br>
+        vivir en <em>coherencia.</em>
+      </p>
+      <div class="services-column">
+        <span class="service-pill">Constelaciones</span>
+        <span class="service-pill">Terapia Sistémica</span>
+        <span class="service-pill">Talleres</span>
+      </div>
+      <p class="handle-bottom">@monicagrizales</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

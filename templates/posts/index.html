@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Templates — Reconociendo mi esencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    font-family: 'Raleway', sans-serif;
+    color: #e8e6e1;
+    min-height: 100vh;
+    padding: 50px 40px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: #e8e6e1;
+  }
+
+  header h1 em {
+    color: #b88d74;
+    font-weight: 400;
+  }
+
+  header p {
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8fa394;
+    margin-top: 10px;
+    font-weight: 300;
+  }
+
+  .palette {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swatch-color {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(232,230,225,0.1);
+  }
+
+  .swatch-label {
+    font-size: 13px;
+    letter-spacing: 1px;
+    opacity: 0.5;
+    font-weight: 300;
+  }
+
+  .divider {
+    width: 50px;
+    height: 1px;
+    background: #b88d74;
+    margin: 50px auto;
+    opacity: 0.3;
+  }
+
+  .template-section {
+    margin-bottom: 60px;
+  }
+
+  .template-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .template-section .desc {
+    font-size: 15px;
+    text-align: center;
+    color: #e8e6e1;
+    opacity: 0.45;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+    font-weight: 300;
+  }
+
+  .template-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .template-link a {
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b88d74;
+    text-decoration: none;
+    border: 1px solid rgba(184,141,116,0.3);
+    padding: 10px 28px;
+    transition: all 0.3s ease;
+    font-weight: 400;
+  }
+
+  .template-link a:hover {
+    background: rgba(184,141,116,0.1);
+    border-color: #b88d74;
+  }
+
+  .preview-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .preview-card {
+    text-align: center;
+  }
+
+  .preview-card .format-label {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.4;
+    margin-bottom: 10px;
+    font-weight: 300;
+  }
+
+  /* Mini previews */
+  .mini-feed {
+    width: 320px;
+    height: 320px;
+    border: 1px solid rgba(232,230,225,0.08);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .mini-story {
+    width: 180px;
+    height: 320px;
+    border: 1px solid rgba(232,230,225,0.08);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Template 1 mini */
+  .t1-mini-feed {
+    background: #e8e6e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .t1-mini-feed .t-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: #2c2c2c;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .t1-mini-feed .t-phrase em {
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .t1-mini-story {
+    background: #e8e6e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 14px;
+  }
+
+  .t1-mini-story .t-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: #2c2c2c;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .t1-mini-story .t-phrase em {
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  /* Template 2 mini */
+  .t2-mini-feed {
+    background: #2c2c2c;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .t2-mini-feed .t-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: #e8e6e1;
+    line-height: 1.45;
+    font-weight: 400;
+  }
+
+  .t2-mini-feed .t-phrase em {
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .t2-mini-story {
+    background: #2c2c2c;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 14px;
+  }
+
+  .t2-mini-story .t-phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: #e8e6e1;
+    line-height: 1.45;
+    font-weight: 400;
+  }
+
+  .t2-mini-story .t-phrase em {
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  /* Template 3 mini */
+  .t3-mini-feed {
+    background: linear-gradient(to bottom, #8fa394 0%, #8fa394 45%, #e8e6e1 45%, #e8e6e1 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .t3-mini-feed .t-top {
+    height: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .t3-mini-feed .t-infinity {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    color: #e8e6e1;
+    opacity: 0.7;
+  }
+
+  .t3-mini-feed .t-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: #e8e6e1;
+    letter-spacing: 1px;
+  }
+
+  .t3-mini-feed .t-bottom {
+    height: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .t3-mini-feed .t-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: #2c2c2c;
+    line-height: 1.4;
+  }
+
+  .t3-mini-feed .t-tagline em {
+    color: #b88d74;
+  }
+
+  .t3-mini-story {
+    background: linear-gradient(to bottom, #8fa394 0%, #8fa394 38%, #e8e6e1 38%, #e8e6e1 100%);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .t3-mini-story .t-top {
+    height: 38%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .t3-mini-story .t-infinity {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: #e8e6e1;
+    opacity: 0.7;
+  }
+
+  .t3-mini-story .t-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: #e8e6e1;
+    letter-spacing: 1px;
+  }
+
+  .t3-mini-story .t-bottom {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+  }
+
+  .t3-mini-story .t-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: #2c2c2c;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .t3-mini-story .t-tagline em {
+    color: #b88d74;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(232,230,225,0.06);
+  }
+
+  footer p {
+    font-size: 14px;
+    opacity: 0.3;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Reconociendo <em>mi esencia</em></h1>
+  <p>Sistema de templates para posts</p>
+  <div class="palette">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #e8e6e1;"></div>
+      <span class="swatch-label">#e8e6e1</span>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #2c2c2c;"></div>
+      <span class="swatch-label">#2c2c2c</span>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #b88d74;"></div>
+      <span class="swatch-label">#b88d74</span>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #8fa394;"></div>
+      <span class="swatch-label">#8fa394</span>
+    </div>
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<!-- TEMPLATE 1 -->
+<section class="template-section">
+  <h2>01 — Frase Inspiracional</h2>
+  <p class="desc">Fondo claro, tipografía centrada, acento en itálica dorada</p>
+  <div class="preview-row">
+    <div class="preview-card">
+      <div class="format-label">Feed</div>
+      <div class="mini-feed t1-mini-feed">
+        <p class="t-phrase">Ser mujer<br>no te puede costar<br><em>tu voz.</em></p>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="format-label">Story</div>
+      <div class="mini-story t1-mini-story">
+        <p class="t-phrase">Ser mujer<br>no te puede costar<br><em>tu voz.</em></p>
+      </div>
+    </div>
+  </div>
+  <div class="template-link">
+    <a href="template-01-informativo.html">Ver template completo →</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TEMPLATE 2 -->
+<section class="template-section">
+  <h2>02 — Frase Atmosférica</h2>
+  <p class="desc">Fondo oscuro, efecto glow sutil, cita + frase principal</p>
+  <div class="preview-row">
+    <div class="preview-card">
+      <div class="format-label">Feed</div>
+      <div class="mini-feed t2-mini-feed">
+        <p class="t-phrase">Qué bendición<br><em>reconocerte</em> y<br>habitar tu poder<br><em>personal.</em></p>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="format-label">Story</div>
+      <div class="mini-story t2-mini-story">
+        <p class="t-phrase">Qué bendición<br><em>reconocerte</em> y<br>habitar tu poder<br><em>personal.</em></p>
+      </div>
+    </div>
+  </div>
+  <div class="template-link">
+    <a href="template-02-atmosferico.html">Ver template completo →</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TEMPLATE 3 -->
+<section class="template-section">
+  <h2>03 — Identidad de Marca</h2>
+  <p class="desc">Split verde/crema, logo + servicios, tagline central</p>
+  <div class="preview-row">
+    <div class="preview-card">
+      <div class="format-label">Feed</div>
+      <div class="mini-feed t3-mini-feed">
+        <div class="t-top">
+          <div class="t-infinity">∞</div>
+          <div class="t-brand">Reconociendo <i>mi esencia</i></div>
+        </div>
+        <div class="t-bottom">
+          <p class="t-tagline">Mirada sistémica para<br>mujeres que quieren<br>vivir en <em>coherencia.</em></p>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="format-label">Story</div>
+      <div class="mini-story t3-mini-story">
+        <div class="t-top">
+          <div class="t-infinity">∞</div>
+          <div class="t-brand">Reconociendo <i>mi esencia</i></div>
+        </div>
+        <div class="t-bottom">
+          <p class="t-tagline">Mirada sistémica para<br>mujeres que quieren<br>vivir en <em>coherencia.</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="template-link">
+    <a href="template-03-marca.html">Ver template completo →</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TEMPLATE 4: CARRUSELES -->
+<section class="template-section">
+  <h2>04 — Carruseles</h2>
+  <p class="desc">3 estilos: Frase desglosada, Mini guía con tips, Storytelling alternado</p>
+  <div class="preview-row">
+    <div class="preview-card">
+      <div class="format-label">A · Frase</div>
+      <div class="mini-feed" style="background:#e8e6e1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px;">
+        <p style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#2c2c2c; line-height:1.4;">No viniste a<br><em style="color:#b88d74; font-weight:500;">encajar.</em></p>
+        <span style="font-family:'Raleway',sans-serif; font-size:9px; color:#8fa394; letter-spacing:2px; margin-top:16px;">DESLIZA →</span>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="format-label">B · Guía</div>
+      <div class="mini-feed" style="background:#2c2c2c; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px;">
+        <span style="font-family:'Raleway',sans-serif; font-size:8px; color:#8fa394; letter-spacing:2px; border:1px solid rgba(143,163,148,0.4); padding:4px 10px;">MIRADA SISTÉMICA</span>
+        <p style="font-family:'Cormorant Garamond',serif; font-size:18px; color:#e8e6e1; line-height:1.35; margin-top:14px;">3 señales de que estás cargando lo que <em style="color:#b88d74; font-weight:500;">no te pertenece</em></p>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="format-label">C · Story</div>
+      <div class="mini-feed" style="background:linear-gradient(to right, #e8e6e1 50%, #2c2c2c 50%); display:flex;">
+        <div style="width:50%; display:flex; justify-content:center; align-items:center; text-align:center; padding:12px;">
+          <p style="font-family:'Cormorant Garamond',serif; font-size:13px; color:#2c2c2c; line-height:1.4;">Creciste creyendo que ser <em style="color:#b88d74;">buena</em> era ser invisible.</p>
+        </div>
+        <div style="width:50%; display:flex; justify-content:center; align-items:center; text-align:center; padding:12px;">
+          <p style="font-family:'Cormorant Garamond',serif; font-size:13px; color:#e8e6e1; line-height:1.4;">Que tu valor dependía de cuánto <em style="color:#b88d74;">dabas.</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="template-link">
+    <a href="template-04-carrusel.html">Ver carruseles completos →</a>
+  </div>
+</section>
+
+<footer>
+  <p>Templates generados para @monicagrizales — AIdeasBoom</p>
+</footer>
+
+</body>
+</html>

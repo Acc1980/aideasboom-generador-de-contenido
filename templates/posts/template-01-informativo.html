@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template 01 — Frase Inspiracional (Fondo Claro)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    padding: 40px;
+    flex-wrap: wrap;
+  }
+  .label {
+    color: #e8e6e1;
+    font-family: 'Raleway', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* ========== FEED 1080x1080 (scaled to 540px) ========== */
+  .feed {
+    width: 540px;
+    height: 540px;
+    background: #e8e6e1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Sutil borde superior decorativo */
+  .feed .top-accent {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: #b88d74;
+    opacity: 0.5;
+  }
+
+  .feed .content {
+    text-align: center;
+    padding: 60px 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .feed .phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+  }
+
+  .feed .phrase em {
+    font-style: italic;
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .feed .bottom-section {
+    width: 100%;
+    padding: 0 70px 40px;
+    text-align: center;
+  }
+
+  .feed .divider-line {
+    width: 40px;
+    height: 1px;
+    background: #b88d74;
+    margin: 0 auto 16px;
+    opacity: 0.6;
+  }
+
+  .feed .subtitle {
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    color: #2c2c2c;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.7;
+    opacity: 0.7;
+  }
+
+  .feed .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+
+  /* ========== STORY 1080x1920 (scaled to 304x540) ========== */
+  .story {
+    width: 304px;
+    height: 540px;
+    background: #e8e6e1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .story .top-accent {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: #b88d74;
+    opacity: 0.5;
+  }
+
+  /* Sutil elemento decorativo lateral */
+  .story .side-line {
+    position: absolute;
+    left: 24px;
+    top: 60px;
+    bottom: 60px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #b88d74 30%, #b88d74 70%, transparent);
+    opacity: 0.2;
+  }
+
+  .story .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 50px 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .story .phrase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #2c2c2c;
+    line-height: 1.45;
+    letter-spacing: 0.3px;
+  }
+
+  .story .phrase em {
+    font-style: italic;
+    color: #b88d74;
+    font-weight: 500;
+  }
+
+  .story .bottom-section {
+    padding: 0 36px 35px;
+    text-align: center;
+  }
+
+  .story .divider-line {
+    width: 30px;
+    height: 1px;
+    background: #b88d74;
+    margin: 0 auto 12px;
+    opacity: 0.6;
+  }
+
+  .story .subtitle {
+    font-family: 'Raleway', sans-serif;
+    font-size: 9px;
+    color: #2c2c2c;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.7;
+    opacity: 0.65;
+  }
+
+  .story .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 9px;
+    color: #8fa394;
+    letter-spacing: 2px;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<!-- FEED VERSION -->
+<div>
+  <div class="label">Feed — 1080 × 1080</div>
+  <div class="feed">
+    <div class="top-accent"></div>
+    <div class="content">
+      <p class="phrase">
+        Ser mujer<br>
+        no te puede costar<br>
+        <em>tu voz.</em>
+      </p>
+    </div>
+    <div class="bottom-section">
+      <div class="divider-line"></div>
+      <p class="subtitle">Mirada sistémica para mujeres<br>que quieren vivir en coherencia.</p>
+      <p class="brand-mark">@monicagrizales</p>
+    </div>
+  </div>
+</div>
+
+<!-- STORY VERSION -->
+<div>
+  <div class="label">Story — 1080 × 1920</div>
+  <div class="story">
+    <div class="top-accent"></div>
+    <div class="side-line"></div>
+    <div class="content">
+      <p class="phrase">
+        Ser mujer<br>
+        no te puede costar<br>
+        <em>tu voz.</em>
+      </p>
+    </div>
+    <div class="bottom-section">
+      <div class="divider-line"></div>
+      <p class="subtitle">Mirada sistémica para mujeres<br>que quieren vivir en coherencia.</p>
+      <p class="brand-mark">@monicagrizales</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
