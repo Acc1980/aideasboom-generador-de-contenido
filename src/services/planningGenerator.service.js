@@ -145,4 +145,69 @@ async function generateFormat(planningId, format, { replace = false } = {}) {
   return { generated: contentRecords.length, format };
 }
 
-module.exports = { createPlanning, generateFormat };
+/**
+ * Regenera una pieza de contenido individual incorporando el feedback del cliente.
+ * Mantiene el mismo formato, etapa de embudo y voz de marca.
+ *
+ * @param {string} contentId - UUID del Content a regenerar
+ * @param {string} feedback  - Comentario del cliente con las modificaciones solicitadas
+ */
+async function regenerateContentPiece(contentId, feedback) {
+  const content = await Content.findByPk(contentId, {
+    include: [{
+      model: Planning,
+      as: 'planning',
+      include: [{ model: Client, as: 'client' }],
+    }],
+  });
+  if (!content) throw new Error(`Contenido no encontrado: ${contentId}`);
+
+  const client = content.planning.client;
+  const systemPrompt = buildSystemPrompt(client.brandIdentity || {});
+
+  const userPrompt = [
+    'Tienes esta pieza de contenido que el cliente quiere modificar:',
+    '',
+    `FORMATO: ${content.format}`,
+    `ETAPA EMBUDO: ${content.funnelStage}`,
+    `TÍTULO ACTUAL: ${content.title}`,
+    `HOOK ACTUAL: ${content.hook || 'N/A'}`,
+    `COPY ACTUAL:\n${content.copy}`,
+    `CTA ACTUAL: ${content.cta}`,
+    `HASHTAGS ACTUALES: ${(content.hashtags || []).join(' ')}`,
+    content.carouselSlides ? `SLIDES ACTUALES: ${JSON.stringify(content.carouselSlides)}` : '',
+    '',
+    `FEEDBACK DEL CLIENTE: ${feedback}`,
+    '',
+    'Regenera la pieza incorporando exactamente el feedback. Mantén el mismo formato, etapa de embudo y voz de marca.',
+    'Devuelve ÚNICAMENTE JSON válido con esta estructura:',
+    '{"pieces":[{"format":"string","funnelStage":"string","title":"string","hook":"string|null","copy":"string","cta":"string","hashtags":["array"],"script":null,"carouselSlides":null,"visualDirection":"string|null"}]}',
+  ].join('\n');
+
+  const aiResponse = await openaiService.generateJSON(systemPrompt, userPrompt, {
+    temperature: 0.7,
+    maxTokens: 2048,
+  });
+
+  const piece = aiResponse.pieces?.[0];
+  if (!piece) throw new Error('OpenAI no devolvió contenido regenerado');
+
+  await content.update({
+    title:          piece.title          || content.title,
+    hook:           piece.hook           ?? content.hook,
+    copy:           piece.copy           || content.copy,
+    cta:            piece.cta            || content.cta,
+    hashtags:       piece.hashtags       || content.hashtags,
+    script:         piece.script         ?? content.script,
+    carouselSlides: piece.carouselSlides ?? content.carouselSlides,
+    visualDirection:piece.visualDirection ?? content.visualDirection,
+    approvalStatus: 'pendiente',
+    clientComments: null,
+    status:         'generated',
+  });
+
+  logger.info(`Pieza regenerada con feedback: ${content.title} → ${piece.title}`);
+  return content.reload();
+}
+
+module.exports = { createPlanning, generateFormat, regenerateContentPiece };

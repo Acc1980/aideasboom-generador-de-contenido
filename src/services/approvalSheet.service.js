@@ -13,6 +13,8 @@ const Content = require('../modules/content/content.model');
 const Planning = require('../modules/planning/planning.model');
 const Client = require('../modules/clients/client.model');
 
+const { regenerateContentPiece } = require('./planningGenerator.service');
+
 const CREDENTIALS_PATH = process.env.GOOGLE_SERVICE_ACCOUNT_PATH
   || path.join(__dirname, '../../credentials/google-service-account.json');
 
@@ -370,14 +372,18 @@ async function importFromSheet(planningId) {
   const rows = res.data.values || [];
 
   const STATUS_MAP = {
-    'aprobado':  'aprobado',
-    'cambios':   'cambios',
-    'no va':     'no_va',
-    'pendiente': 'pendiente',
+    'aprobado':   'aprobado',
+    'cambios':    'cambios',
+    'modificar':  'cambios',
+    'no va':      'no_va',
+    'pendiente':  'pendiente',
+    'pendiente revisión': 'pendiente',
   };
 
   const contents = planning.contents;
   let updated = 0;
+  let regenerated = 0;
+  const toRegenerate = [];
 
   for (let i = 0; i < contents.length; i++) {
     const row = rows[i] || [];
@@ -389,10 +395,34 @@ async function importFromSheet(planningId) {
 
     await contents[i].update({ clientComments: comentarios, approvalStatus, status });
     updated++;
+
+    // Marcar para regeneración automática si tiene feedback
+    if (approvalStatus === 'cambios' && comentarios) {
+      toRegenerate.push({ content: contents[i], feedback: comentarios });
+    }
   }
 
-  logger.info(`Aprobaciones importadas: ${updated} piezas actualizadas`);
-  return { updated };
+  // Regenerar piezas con feedback usando OpenAI
+  if (toRegenerate.length > 0) {
+    logger.info(`Regenerando ${toRegenerate.length} pieza(s) con feedback del cliente...`);
+    for (const { content, feedback } of toRegenerate) {
+      try {
+        await regenerateContentPiece(content.id, feedback);
+        regenerated++;
+        logger.info(`✓ Regenerada: ${content.title}`);
+      } catch (err) {
+        logger.error(`Error regenerando pieza ${content.id}: ${err.message}`);
+      }
+    }
+    // Re-exportar el sheet con el contenido actualizado
+    if (regenerated > 0) {
+      logger.info('Re-exportando sheet con contenido regenerado...');
+      await exportToSheet(planningId);
+    }
+  }
+
+  logger.info(`Aprobaciones importadas: ${updated} piezas, ${regenerated} regeneradas`);
+  return { updated, regenerated };
 }
 
 // ── Stories: Exportar al sheet maestro ───────────────────────────────
