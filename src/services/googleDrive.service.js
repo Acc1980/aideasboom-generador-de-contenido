@@ -28,6 +28,14 @@ const Client = require('../modules/clients/client.model');
 const CREDENTIALS_PATH = process.env.GOOGLE_SERVICE_ACCOUNT_PATH
   || path.join(__dirname, '../../credentials/google-service-account.json');
 
+// Soporte para credenciales inline via env var
+function getCredentialsOption() {
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    return { credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) };
+  }
+  return { keyFile: CREDENTIALS_PATH };
+}
+
 const MESES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -50,7 +58,7 @@ function getAuth() {
     return oAuth2;
   }
   return new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
+    ...getCredentialsOption(),
     scopes: ['https://www.googleapis.com/auth/drive'],
   });
 }

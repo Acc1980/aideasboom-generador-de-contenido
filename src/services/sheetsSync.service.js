@@ -13,6 +13,14 @@ const Strategy = require('../modules/strategy/strategy.model');
 const CREDENTIALS_PATH = process.env.GOOGLE_SERVICE_ACCOUNT_PATH
   || path.join(__dirname, '../../credentials/google-service-account.json');
 
+// Soporte para credenciales inline via env var
+function getCredentialsOption() {
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    return { credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) };
+  }
+  return { keyFile: CREDENTIALS_PATH };
+}
+
 // IDs de los sheets (se configuran en .env)
 const SHEET_IDS = {
   clientes:   process.env.SHEET_CLIENTES_ID,
@@ -28,7 +36,7 @@ const MESES = {
 
 function getAuth() {
   return new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
+    ...getCredentialsOption(),
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 }

@@ -18,10 +18,20 @@ const CREDENTIALS_PATH = process.env.GOOGLE_SERVICE_ACCOUNT_PATH
 
 const MASTER_SHEET_ID = process.env.SHEET_APROBACIONES_ID;
 
+// Soporte para credenciales inline via env var (para despliegues en VPS)
+function getCredentialsOption() {
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    return { credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) };
+  }
+  return { keyFile: CREDENTIALS_PATH };
+}
+
 // Obtener email de la cuenta de servicio para protecciones
 let SA_EMAIL = null;
 try {
-  const saJson = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, 'utf8'));
+  const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+    ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON)
+    : JSON.parse(fs.readFileSync(CREDENTIALS_PATH, 'utf8'));
   SA_EMAIL = saJson.client_email;
 } catch (_) {}
 
@@ -30,7 +40,7 @@ const MESES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
 
 function getAuth() {
   return new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
+    ...getCredentialsOption(),
     scopes: [
       'https://www.googleapis.com/auth/spreadsheets',
       'https://www.googleapis.com/auth/drive',
