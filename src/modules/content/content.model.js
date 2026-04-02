@@ -96,6 +96,12 @@ const Content = sequelize.define('Content', {
     field: 'image_url',
     comment: 'URL de la imagen generada (cover para carruseles)',
   },
+  videoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'video_url',
+    comment: 'URL del video generado con Veo 3.1 (solo reels)',
+  },
 }, {
   tableName: 'contents',
   underscored: true,

@@ -53,9 +53,46 @@ async function updateContentStatus(req, res, next) {
   }
 }
 
+// Devuelve reels aprobados sin video generado aún (para n8n/Veo 3.1)
+async function getPendingVideo(_req, res, next) {
+  try {
+    const { Op } = require('sequelize');
+    const contents = await Content.findAll({
+      where: {
+        format: 'reel',
+        approvalStatus: 'aprobado',
+        videoUrl: { [Op.is]: null },
+      },
+      order: [['order', 'ASC']],
+    });
+    res.json(contents);
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Actualiza la URL del video generado por Veo 3.1
+async function updateVideoUrl(req, res, next) {
+  try {
+    const content = await Content.findByPk(req.params.id);
+    if (!content) return res.status(404).json({ error: 'Contenido no encontrado' });
+
+    const { videoUrl } = req.body;
+    if (!videoUrl) return res.status(400).json({ error: 'videoUrl es requerido' });
+
+    await content.update({ videoUrl, status: 'approved' });
+    logger.info(`Video URL guardada en contenido ${content.id}`);
+    res.json({ ok: true, id: content.id, videoUrl: content.videoUrl });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getContentsByPlanning,
   getContentById,
   updateContent,
   updateContentStatus,
+  getPendingVideo,
+  updateVideoUrl,
 };
