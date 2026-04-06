@@ -28,6 +28,13 @@ const PACKAGES = {
     carruseles: 3,
     total: 7,
   },
+  reels_5: {
+    label: '5 Reels por semana',
+    reels: 5,
+    posts: 2,
+    carruseles: 2,
+    total: 9,
+  },
 };
 
 // Distribución estándar del embudo de marketing

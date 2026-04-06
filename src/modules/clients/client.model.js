@@ -26,7 +26,7 @@ const Client = sequelize.define('Client', {
     unique: true,
   },
   packageType: {
-    type: DataTypes.ENUM('basico', 'premium', 'personalizado_7'),
+    type: DataTypes.ENUM('basico', 'premium', 'personalizado_7', 'reels_5'),
     allowNull: false,
     field: 'package_type',
   },

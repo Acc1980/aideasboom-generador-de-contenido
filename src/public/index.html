@@ -1388,8 +1388,10 @@
 
   // ── Distribución de piezas por paquete ──────────────────────────
   const PKG_DIST = {
-    basico:  { reels: 2, posts: 2, carruseles: 2 },
-    premium: { reels: 3, posts: 4, carruseles: 4 },
+    basico:          { reels: 2, posts: 2, carruseles: 2 },
+    premium:         { reels: 3, posts: 4, carruseles: 4 },
+    personalizado_7: { reels: 2, posts: 2, carruseles: 3 },
+    reels_5:         { reels: 5, posts: 0, carruseles: 0 },
   };
   function buildDistributionBadges(packageType, brandIdentity) {
     const bi = brandIdentity || {};

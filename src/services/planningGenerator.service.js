@@ -45,6 +45,16 @@ async function createPlanning(client, year, month, week = 1) {
     distribution = calculatePackageDistribution(client.packageType, compiledStrategy.conversionActive);
   }
 
+  // Aplicar weeklyDistribution personalizada si está definida en la identidad de marca
+  const wd = client.brandIdentity && client.brandIdentity.weeklyDistribution;
+  if (wd) {
+    distribution.reels = wd.reels ?? distribution.reels;
+    distribution.posts = wd.posts ?? distribution.posts;
+    distribution.carruseles = wd.carruseles ?? distribution.carruseles;
+    distribution.total = distribution.reels + distribution.posts + distribution.carruseles;
+    logger.info(`Distribución sobreescrita por weeklyDistribution: reels=${distribution.reels} posts=${distribution.posts} carruseles=${distribution.carruseles}`);
+  }
+
   const planning = await Planning.create({
     clientId: client.id,
     year,
