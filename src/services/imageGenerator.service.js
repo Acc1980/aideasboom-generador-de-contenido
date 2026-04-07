@@ -116,7 +116,8 @@ function buildPostHTML(piece, client) {
     padding:80px 90px;position:relative;
   }
   .logo{position:absolute;top:48px;left:60px;
-    max-width:320px;max-height:130px;object-fit:contain}
+    max-width:320px;max-height:130px;object-fit:contain;
+    background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px}
   .hook-wrap{text-align:center;margin-bottom:48px;max-width:920px}
   .hook{
     font-family:${titleFF};
