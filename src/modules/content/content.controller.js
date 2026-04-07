@@ -53,6 +53,18 @@ async function updateContentStatus(req, res, next) {
   }
 }
 
+async function approveContent(req, res, next) {
+  try {
+    const content = await Content.findByPk(req.params.id);
+    if (!content) return res.status(404).json({ error: 'Contenido no encontrado' });
+    if (content.format !== 'reel') return res.status(400).json({ error: 'Solo se pueden aprobar reels para generación de video' });
+    await content.update({ approvalStatus: 'aprobado' });
+    res.json({ ok: true, id: content.id, approvalStatus: 'aprobado' });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Devuelve reels aprobados sin video generado aún (para n8n/Veo 3.1)
 async function getPendingVideo(_req, res, next) {
   try {
@@ -93,6 +105,7 @@ module.exports = {
   getContentById,
   updateContent,
   updateContentStatus,
+  approveContent,
   getPendingVideo,
   updateVideoUrl,
 };
