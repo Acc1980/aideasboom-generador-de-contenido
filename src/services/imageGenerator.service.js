@@ -116,8 +116,8 @@ function buildPostHTML(piece, client) {
     padding:80px 90px;position:relative;
   }
   .logo{position:absolute;top:48px;left:60px;
-    max-width:320px;max-height:130px;object-fit:contain;
-    background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px}
+    max-width:280px;max-height:110px;object-fit:contain;
+    filter:drop-shadow(0 0 3px rgba(0,0,0,0.25))}
   .hook-wrap{text-align:center;margin-bottom:48px;max-width:920px}
   .hook{
     font-family:${titleFF};
@@ -201,7 +201,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
   .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
   .circ{position:absolute;width:500px;height:500px;border-radius:50%;
     border:1px solid ${accent};opacity:.1;top:-150px;right:-150px}
-  .logo{position:absolute;top:50px;left:60px;max-width:320px;max-height:130px;object-fit:contain}
+  .logo{position:absolute;top:50px;left:60px;max-width:280px;max-height:110px;object-fit:contain;filter:brightness(0) invert(1)}
   .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
     font-size:18px;letter-spacing:2px;opacity:.4;color:${fg}}
   .title{font-size:${fSize}px;line-height:1.2;text-align:center;font-family:${titleFF};
@@ -248,7 +248,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:90px;position:relative}
   .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
-  .logo{position:absolute;top:50px;left:60px;max-width:320px;max-height:130px;object-fit:contain}
+  .logo{position:absolute;top:50px;left:60px;max-width:280px;max-height:110px;object-fit:contain;filter:brightness(0) invert(1)}
   .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
     font-size:16px;letter-spacing:2px;opacity:.4;color:${fg}}
   .body-text{font-family:${bodyFF};font-size:40px;font-weight:700;line-height:1.5;
@@ -281,7 +281,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
     display:flex;flex-direction:column;justify-content:space-between;
     padding:64px 80px;position:relative}
   .top{display:flex;justify-content:space-between;align-items:center}
-  .logo-sm{max-width:240px;max-height:96px;object-fit:contain;opacity:.7}
+  .logo-sm{max-width:240px;max-height:96px;object-fit:contain;opacity:.9;filter:drop-shadow(0 0 2px rgba(0,0,0,0.15))}
   .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.35;color:${fg}}
   .sep{width:56px;height:3px;background:${accent};margin:28px 0}
   .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
