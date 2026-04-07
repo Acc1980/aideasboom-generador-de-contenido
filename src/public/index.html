@@ -1170,7 +1170,27 @@
               🎬 Aprobar para video
             </button>
           </div>` : ''}
-          ${p.approvalStatus === 'aprobado' ? `
+          ${p.format === 'reel' && p.videoUrl && p.status === 'reviewed' ? `
+          <div style="margin-top:12px">
+            <video controls style="width:100%;max-height:360px;border-radius:8px;background:#000" src="${p.videoUrl}">
+              Tu navegador no soporta el elemento video.
+            </video>
+            <div class="publish-actions" style="margin-top:8px">
+              <button class="btn-publish" style="background:#10b981;color:#fff" onclick="aprobarDiseno(this, '${p.id}')">
+                ✅ Aprobar diseño
+              </button>
+            </div>
+          </div>` : ''}
+          ${p.format === 'reel' && p.videoUrl && (p.status === 'approved' || p.status === 'published') ? `
+          <div style="margin-top:12px">
+            <video controls style="width:100%;max-height:360px;border-radius:8px;background:#000" src="${p.videoUrl}">
+              Tu navegador no soporta el elemento video.
+            </video>
+            <div style="margin-top:6px;font-size:12px;color:#10b981;font-weight:600">
+              ✓ Diseño aprobado — en cola de publicación
+            </div>
+          </div>` : ''}
+          ${p.approvalStatus === 'aprobado' && p.format !== 'reel' ? `
           <div class="publish-actions">
             <button class="btn-publish btn-copy-caption" onclick="copiarCaption(this, '${p.id}')">
               📋 Copiar caption
@@ -1181,9 +1201,15 @@
             ${p.format === 'carrusel' ? `<button class="btn-publish btn-download-img" onclick="descargarCarrusel(${p.order})">
               ⬇ Descargar slides
             </button>` : ''}
-            ${p.format === 'reel' ? `<button class="btn-publish btn-copy-caption" onclick="copiarScript(this, '${p.id}')">
+          </div>` : ''}
+          ${p.approvalStatus === 'aprobado' && p.format === 'reel' ? `
+          <div class="publish-actions">
+            <button class="btn-publish btn-copy-caption" onclick="copiarCaption(this, '${p.id}')">
+              📋 Copiar caption
+            </button>
+            <button class="btn-publish btn-copy-caption" onclick="copiarScript(this, '${p.id}')">
               🎬 Copiar script
-            </button>` : ''}
+            </button>
           </div>` : ''}
         </div>
       `).join('');
@@ -1329,6 +1355,23 @@
       }, 2000);
     } catch (e) {
       toast('Error al copiar script', 'error');
+    }
+  }
+
+  async function aprobarDiseno(btn, contentId) {
+    if (!confirm('¿Aprobar el diseño final de este reel para publicación?')) return;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Aprobando...';
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}/approve-video`, { method: 'PATCH' });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error al aprobar diseño', 'error'); btn.disabled = false; btn.innerHTML = '✅ Aprobar diseño'; return; }
+      toast('Reel encolado para publicación', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error al aprobar diseño', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '✅ Aprobar diseño';
     }
   }
 
