@@ -135,9 +135,13 @@ function buildPostHTML(piece, client, bgDataUrl) {
     )}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;width:100%}
-  .logo{position:absolute;top:48px;left:60px;z-index:2;
-    max-width:260px;max-height:100px;object-fit:contain;
-    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
+  .logo-wrap{position:absolute;top:48px;left:60px;z-index:2;
+    display:inline-flex;align-items:center;gap:14px;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);
+    padding:12px 20px;border-radius:12px}
+  .logo{max-width:72px;max-height:72px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:22px;font-weight:700;
+    color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .hook-wrap{text-align:center;margin-bottom:44px;max-width:900px}
   .hook{
     font-family:${titleFF};font-size:${fontSize}px;
@@ -156,7 +160,10 @@ function buildPostHTML(piece, client, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <div class="logo-wrap">
+    ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
+  </div>
   <div class="content">
     <div class="hook-wrap"><span class="hook">${hookHtml}</span></div>
     <div class="divider"></div>
