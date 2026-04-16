@@ -244,8 +244,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
   .overlay{position:absolute;inset:0;background:linear-gradient(
     to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.6) 50%,rgba(0,0,0,0.82) 100%)}
-  .bottom-cover{position:absolute;bottom:0;left:0;right:0;height:140px;
-    background:${primary};opacity:0.92;z-index:0}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:18px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -260,7 +258,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  <div class="bottom-cover"></div>
   ${logoBlockPhoto}
   <span class="slide-num">1 / ${totalSlides}</span>
   <div class="content">
@@ -296,8 +293,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
   .overlay{position:absolute;inset:0;background:linear-gradient(
     to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.65) 50%,rgba(0,0,0,0.87) 100%)}
-  .bottom-cover{position:absolute;bottom:0;left:0;right:0;height:140px;
-    background:${primary};opacity:0.92;z-index:0}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -313,7 +308,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  <div class="bottom-cover"></div>
   ${logoBlockPhoto}
   <span class="slide-num">${slide.slide} / ${totalSlides}</span>
   <div class="content">
