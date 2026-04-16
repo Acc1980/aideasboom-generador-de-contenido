@@ -88,7 +88,7 @@ function fetchAsDataUrl(imageUrl) {
  * @returns {string}       - Data URL base64 lista para embeber en HTML
  */
 async function generateImage(prompt) {
-  const safePrompt = `${prompt}. No text, no watermark, no logo, no words, photorealistic, professional photography`;
+  const safePrompt = `${prompt}. Photorealistic, professional sports photography, cinematic lighting, dramatic atmosphere. No text, no words, no watermark, no logo, no team badge, no team emblem, no jersey numbers, no captions, no overlays, no graphics, no UI elements`;
 
   const body = JSON.stringify({
     prompt: safePrompt,

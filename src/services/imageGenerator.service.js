@@ -137,7 +137,7 @@ function buildPostHTML(piece, client, bgDataUrl) {
     align-items:center;width:100%}
   .logo{position:absolute;top:48px;left:60px;z-index:2;
     max-width:260px;max-height:100px;object-fit:contain;
-    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
   .hook-wrap{text-align:center;margin-bottom:44px;max-width:900px}
   .hook{
     font-family:${titleFF};font-size:${fontSize}px;
@@ -221,7 +221,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.6) 50%,rgba(0,0,0,0.8) 100%)}
   .logo{position:absolute;top:50px;left:60px;z-index:2;
     max-width:260px;max-height:100px;object-fit:contain;
-    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:18px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -273,7 +273,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.65) 50%,rgba(0,0,0,0.85) 100%)}
   .logo{position:absolute;top:50px;left:60px;z-index:2;
     max-width:240px;max-height:96px;object-fit:contain;
-    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
