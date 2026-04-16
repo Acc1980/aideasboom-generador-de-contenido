@@ -391,6 +391,19 @@ async function generateImages(planningId) {
   const pieces = planning.contents.filter(p => p.format !== 'reel');
   logger.info(`Generando imágenes para planning ${planningId} → ${pieces.length} piezas (reels excluidos)`);
 
+  // Rotación de deportes para que las fotos varíen entre piezas
+  const SPORTS_ROTATION = [
+    'jugador de fútbol en acción, estadio lleno, celebración de gol',
+    'jugador de baloncesto saltando a encestar, cancha profesional, NBA style',
+    'atleta corriendo en pista de atletismo, sprint final, estadio olímpico',
+    'tenista golpeando la pelota, cancha profesional, acción dinámica',
+    'boxeador en el ring, guantes rojos, iluminación dramática de ring',
+    'ciclista en velocidad, competencia profesional, primer plano',
+    'nadador en competencia, piscina olímpica, salpicaduras de agua',
+    'voleibolista rematando, red de voleibol, estadio de competencia',
+  ];
+  const sportFor = (idx) => SPORTS_ROTATION[idx % SPORTS_ROTATION.length];
+
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
@@ -401,11 +414,13 @@ async function generateImages(planningId) {
   try {
     const page = await browser.newPage();
 
-    for (const piece of pieces) {
+    for (let pieceIdx = 0; pieceIdx < pieces.length; pieceIdx++) {
+      const piece = pieces[pieceIdx];
       if (piece.format === 'post') {
         // ── Foto AI de fondo ──────────────────────────────────────────────
         const visualHint = piece.visualDirection || piece.title;
-        const imagePrompt = `Fotografía deportiva profesional, atleta en acción, estadio, iluminación dramática. Contexto: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
+        const sport = sportFor(pieceIdx);
+        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Contexto adicional: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
         let bgDataUrl = null;
         try {
           logger.info(`  → Generando fondo AI para post "${piece.title}"...`);
@@ -435,7 +450,8 @@ async function generateImages(planningId) {
 
         // ── Una sola foto AI para portada y cierre ────────────────────────
         const visualHint = piece.visualDirection || piece.title;
-        const imagePrompt = `Fotografía deportiva profesional, atleta en acción, estadio, iluminación dramática. Contexto: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
+        const sport = sportFor(pieceIdx);
+        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Contexto adicional: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
         let bgDataUrl = null;
         try {
           logger.info(`    → Generando fondo AI para carrusel "${piece.title}"...`);
