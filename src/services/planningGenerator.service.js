@@ -288,4 +288,64 @@ async function regenerateContentPiece(contentId, feedback) {
   return content.reload();
 }
 
-module.exports = { createPlanning, generateFormat, regenerateContentPiece };
+/**
+ * Genera una pieza completamente nueva para un slot rechazado (no_va).
+ * Misma formato y etapa de embudo, idea totalmente diferente.
+ *
+ * @param {string} contentId - UUID del Content rechazado
+ */
+async function generateNewPieceForSlot(contentId) {
+  const content = await Content.findByPk(contentId, {
+    include: [{
+      model: Planning,
+      as: 'planning',
+      include: [{ model: Client, as: 'client' }],
+    }],
+  });
+  if (!content) throw new Error(`Contenido no encontrado: ${contentId}`);
+
+  const client = content.planning.client;
+  const systemPrompt = buildSystemPrompt(client.brandIdentity || {});
+
+  const userPrompt = [
+    'La siguiente pieza fue rechazada por el cliente. Genera una idea COMPLETAMENTE DIFERENTE para el mismo slot:',
+    '',
+    `FORMATO: ${content.format}`,
+    `ETAPA EMBUDO: ${content.funnelStage}`,
+    `TÍTULO ANTERIOR (no repetir): ${content.title}`,
+    '',
+    'Crea un ángulo distinto, tema diferente, enfoque nuevo. Mantén la voz de marca del cliente.',
+    'Devuelve ÚNICAMENTE JSON válido con esta estructura:',
+    '{"pieces":[{"format":"string","funnelStage":"string","title":"string","hook":"string|null","copy":"string","cta":"string","hashtags":["array"],"script":null,"carouselSlides":null,"visualDirection":"string|null"}]}',
+  ].join('\n');
+
+  const aiResponse = await openaiService.generateJSON(systemPrompt, userPrompt, {
+    temperature: 0.85,
+    maxTokens: 2048,
+  });
+
+  const piece = aiResponse.pieces?.[0];
+  if (!piece) throw new Error('OpenAI no devolvió contenido nuevo');
+
+  await content.update({
+    title:           piece.title           || content.title,
+    hook:            piece.hook            ?? null,
+    copy:            piece.copy            || content.copy,
+    cta:             piece.cta             || content.cta,
+    hashtags:        piece.hashtags        || [],
+    script:          piece.script          ?? null,
+    carouselSlides:  piece.carouselSlides  ?? null,
+    visualDirection: piece.visualDirection ?? null,
+    approvalStatus:  'pendiente',
+    clientComments:  null,
+    status:          'generated',
+    falRequestId:    null,
+    imageUrl:        null,
+    videoUrl:        null,
+  });
+
+  logger.info(`Nueva pieza generada para slot rechazado: "${content.title}" → "${piece.title}"`);
+  return content.reload();
+}
+
+module.exports = { createPlanning, generateFormat, regenerateContentPiece, generateNewPieceForSlot };

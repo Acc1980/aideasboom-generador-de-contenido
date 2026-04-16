@@ -154,6 +154,29 @@ async function generateVideo(req, res, next) {
   }
 }
 
+// Regenera una pieza: nueva idea si está en no_va, o con feedback si está en cambios
+async function regenerateContent(req, res, next) {
+  try {
+    const { regenerateContentPiece, generateNewPieceForSlot } = require('../../services/planningGenerator.service');
+    const content = await Content.findByPk(req.params.id);
+    if (!content) return res.status(404).json({ error: 'Contenido no encontrado' });
+
+    let updated;
+    if (content.approvalStatus === 'no_va') {
+      updated = await generateNewPieceForSlot(req.params.id);
+    } else {
+      const feedback = req.body.feedback || content.clientComments;
+      if (!feedback) return res.status(400).json({ error: 'Se requiere feedback para regenerar' });
+      updated = await regenerateContentPiece(req.params.id, feedback);
+    }
+
+    logger.info(`Contenido ${content.id} regenerado (modo: ${content.approvalStatus === 'no_va' ? 'nueva pieza' : 'con feedback'})`);
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getContentsByPlanning,
   getContentById,
@@ -164,4 +187,5 @@ module.exports = {
   getPendingVideo,
   updateVideoUrl,
   generateVideo,
+  regenerateContent,
 };

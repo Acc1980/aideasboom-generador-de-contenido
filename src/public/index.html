@@ -1184,7 +1184,10 @@
             <button class="btn-publish" style="background:#ef4444;color:#fff" onclick="rechazarPieza(this, '${p.id}')">✕ No va</button>
           </div>` : ''}
           ${p.format !== 'reel' && p.approvalStatus === 'no_va' ? `
-          <div style="margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">✕ Descartada</div>` : ''}
+          <div style="margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">✕ Descartada</div>
+          <div class="publish-actions" style="margin-top:6px">
+            <button class="btn-publish" style="background:#6366f1;color:#fff" onclick="regenerarNuevaPieza('${p.id}')">🔄 Nueva pieza</button>
+          </div>` : ''}
           ${p.format !== 'reel' && p.approvalStatus === 'cambios' ? `
           <div style="margin-top:8px;font-size:12px;color:#f59e0b;font-weight:600">✎ Cambios solicitados — regenera cuando quieras</div>
           <div class="publish-actions" style="margin-top:6px">
@@ -1197,7 +1200,10 @@
             <button class="btn-publish" style="background:#ef4444;color:#fff" onclick="rechazarPieza(this, '${p.id}')">✕ No va</button>
           </div>` : ''}
           ${p.format === 'reel' && p.approvalStatus === 'no_va' ? `
-          <div style="margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">✕ Descartado</div>` : ''}
+          <div style="margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">✕ Descartado</div>
+          <div class="publish-actions" style="margin-top:6px">
+            <button class="btn-publish" style="background:#6366f1;color:#fff" onclick="regenerarNuevaPieza('${p.id}')">🔄 Nueva pieza</button>
+          </div>` : ''}
           ${p.format === 'reel' && p.approvalStatus === 'cambios' ? `
           <div style="margin-top:8px;font-size:12px;color:#f59e0b;font-weight:600">✎ Cambios solicitados</div>
           <div class="publish-actions" style="margin-top:6px">
@@ -1441,6 +1447,23 @@
     } catch (e) {
       toast('Error', 'error');
       btn.disabled = false;
+    }
+  }
+
+  async function regenerarNuevaPieza(contentId) {
+    if (!confirm('¿Generar una pieza completamente nueva para este slot?')) return;
+    toast('Generando nueva pieza...', 'success');
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) { toast('Error al generar nueva pieza', 'error'); return; }
+      toast('¡Nueva pieza lista!', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error al generar nueva pieza', 'error');
     }
   }
 

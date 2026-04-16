@@ -13,5 +13,6 @@ router.patch('/:id/approve', ctrl.approveContent);
 router.patch('/:id/approve-video', ctrl.approveVideo);
 router.patch('/:id/video-url', ctrl.updateVideoUrl);
 router.post('/:id/generate-video', ctrl.generateVideo);
+router.post('/:id/regenerate', ctrl.regenerateContent);
 
 module.exports = router;
