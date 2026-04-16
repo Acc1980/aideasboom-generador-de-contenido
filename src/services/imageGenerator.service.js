@@ -378,8 +378,8 @@ async function generateImages(planningId) {
   const outputDir = path.join(OUTPUT_BASE, planningId);
   ensureDir(outputDir);
 
-  // Posts y carruseles: excluye reels y rechazados (no_va)
-  const pieces = planning.contents.filter(p => p.format !== 'reel' && p.approvalStatus !== 'no_va');
+  // Posts y carruseles: solo los aprobados
+  const pieces = planning.contents.filter(p => p.format !== 'reel' && p.approvalStatus === 'aprobado');
 
   // Reels aprobados sin video ni solicitud en curso → encolar en Kling
   const reelsPendingVideo = planning.contents.filter(p =>
