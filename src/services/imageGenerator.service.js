@@ -194,16 +194,24 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   const isLast  = slide.slide === totalSlides;
   const isPhoto = (isFirst || isLast) && bgDataUrl;
 
-  // Slides de contenido: alternan primary (oscuro) y accent
-  // Slide 2 → primary, Slide 3 → accent, Slide 4 → primary, ...
+  // Paleta manual La Zona Campeón: oscuro + 2 claros alternantes
+  const MID_LIGHT1 = '#fdf0ec'; // rosado muy tenue
+  const MID_LIGHT2 = '#f5e8d0'; // beige cálido
+
+  // Rotación de 3 colores: dark → light1 → light2 → dark → ...
   const midIndex = slide.slide - 2; // 0-based para slides del centro
-  const usePrimary = midIndex % 2 === 0;
-  const midBg = usePrimary ? primary : accent;
-  // Si el fondo es claro (accent puede ser claro), elegir texto adecuado
-  const midFg = usePrimary ? lightColor : (isLightColor(accent) ? '#1a1a1a' : lightColor);
+  const rotation = ((midIndex % 3) + 3) % 3;
+  let midBg, midFg, midSepColor, midIsLight;
+  if (rotation === 0) {
+    midBg = primary; midFg = accent; midSepColor = accent; midIsLight = false;
+  } else if (rotation === 1) {
+    midBg = MID_LIGHT1; midFg = primary; midSepColor = accent; midIsLight = true;
+  } else {
+    midBg = MID_LIGHT2; midFg = primary; midSepColor = primary; midIsLight = true;
+  }
 
   // Puntos de progreso
-  const dotColor = isPhoto ? '#fff' : (isFirst || isLast ? lightColor : accent);
+  const dotColor = isPhoto ? '#fff' : (midIsLight ? primary : accent);
   const dots = Array.from({ length: totalSlides }, (_, i) => {
     const active = i + 1 === slide.slide;
     return `<div style="width:${active ? 20 : 7}px;height:7px;border-radius:4px;background:${dotColor};opacity:${active ? 0.9 : 0.25}"></div>`;
@@ -310,9 +318,11 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   // ── SLIDES DE CONTENIDO (centro) — alternan primary / accent ─────────────
   const tSize = hookFontSize(slide.title, 62, 46);
   const bSize = slide.text && slide.text.length > 200 ? 38 : 44;
-  // En fondo oscuro: pastilla dorada. En fondo claro: sin fondo extra.
-  const wrapBg   = usePrimary ? `background:${accent};padding:10px 16px;border-radius:10px` : 'padding:4px 0';
-  const nameColor = usePrimary ? primary : primary;
+  // En fondo oscuro: pastilla dorada. En fondo claro: pastilla oscura suave.
+  const wrapBg   = !midIsLight
+    ? `background:${accent};padding:10px 16px;border-radius:10px`
+    : `background:rgba(44,47,58,0.08);padding:10px 16px;border-radius:10px`;
+  const nameColor = primary;
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
@@ -326,7 +336,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   .logo-sm{max-width:60px;max-height:60px;object-fit:contain;display:block}
   .logo-name{font-family:${bodyFF};font-size:20px;font-weight:700;color:${nameColor};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.4;color:${midFg}}
-  .sep{width:56px;height:3px;background:${usePrimary ? accent : primary};margin:28px 0;border-radius:2px}
+  .sep{width:56px;height:3px;background:${midSepColor};margin:28px 0;border-radius:2px}
   .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
     color:${midFg};max-width:900px}
   .body-text{font-size:${bSize}px;line-height:1.7;color:${midFg};
