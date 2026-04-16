@@ -1165,6 +1165,12 @@
           ${p.visualDirection ? `<div class="piece-copy" style="margin-top:8px;font-size:12px;color:#6b7280"><strong>Dirección visual:</strong> ${p.visualDirection}</div>` : ''}
           ${p.hashtags && p.hashtags.length ? `<div class="piece-hashtags">${p.hashtags.join(' ')}</div>` : ''}
           ${p.clientComments ? `<div style="margin-top:10px;padding:10px;background:#fef9ec;border-radius:8px;font-size:13px;color:#92400e"><strong>Comentario del cliente:</strong> ${p.clientComments}</div>` : ''}
+          ${p.format !== 'reel' && p.approvalStatus !== 'aprobado' ? `
+          <div class="publish-actions">
+            <button class="btn-publish" style="background:#10b981;color:#fff" onclick="aprobarPieza(this, '${p.id}')">
+              ✅ Aprobar
+            </button>
+          </div>` : ''}
           ${p.format === 'reel' && p.approvalStatus !== 'aprobado' ? `
           <div class="publish-actions">
             <button class="btn-publish" style="background:#f59e0b;color:#fff" onclick="aprobarReel(this, '${p.id}')">
@@ -1390,6 +1396,25 @@
       toast('Error al aprobar reel', 'error');
       btn.disabled = false;
       btn.innerHTML = '🎬 Aprobar para video';
+    }
+  }
+
+  async function aprobarPieza(btn, contentId) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Aprobando...';
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approvalStatus: 'aprobado' }),
+      });
+      if (!res.ok) { toast('Error al aprobar', 'error'); btn.disabled = false; btn.innerHTML = '✅ Aprobar'; return; }
+      toast('Pieza aprobada', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error al aprobar', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '✅ Aprobar';
     }
   }
 
