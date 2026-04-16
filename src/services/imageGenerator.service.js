@@ -129,9 +129,9 @@ function buildPostHTML(piece, client, bgDataUrl) {
   .overlay{position:absolute;inset:0;
     background:linear-gradient(
       to bottom,
-      rgba(0,0,0,0.25) 0%,
-      rgba(0,0,0,0.55) 45%,
-      rgba(0,0,0,0.95) 100%
+      rgba(0,0,0,0.15) 0%,
+      rgba(0,0,0,0.45) 50%,
+      rgba(0,0,0,0.65) 100%
     )}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;width:100%}
