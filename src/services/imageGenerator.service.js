@@ -378,9 +378,16 @@ async function generateImages(planningId) {
   const outputDir = path.join(OUTPUT_BASE, planningId);
   ensureDir(outputDir);
 
-  // Los reels NO generan imagen — el cliente los graba
-  // Las piezas rechazadas (no_va) tampoco — hay que regenerar el contenido primero
+  // Posts y carruseles: excluye reels y rechazados (no_va)
   const pieces = planning.contents.filter(p => p.format !== 'reel' && p.approvalStatus !== 'no_va');
+
+  // Reels aprobados sin video ni solicitud en curso → encolar en Kling
+  const reelsPendingVideo = planning.contents.filter(p =>
+    p.format === 'reel' &&
+    p.approvalStatus === 'aprobado' &&
+    !p.falRequestId &&
+    !p.videoUrl,
+  );
   logger.info(`Generando imágenes para planning ${planningId} → ${pieces.length} piezas (reels excluidos)`);
 
   // Rotación de deportes para que las fotos varíen entre piezas
@@ -477,7 +484,25 @@ async function generateImages(planningId) {
   }
 
   logger.info(`Total generado: ${generatedFiles.length} archivos en ${outputDir}`);
-  return { generatedFiles, outputDir };
+
+  // ── Encolar reels aprobados en fal.ai Kling ───────────────────────────────
+  const { submitVideo } = require('./fal.service');
+  const queuedReels = [];
+  for (const reel of reelsPendingVideo) {
+    try {
+      const prompt = reel.script?.prompt || reel.visualDirection || reel.title;
+      const duration = reel.script?.duration || 5;
+      const requestId = await submitVideo(prompt, duration);
+      await reel.update({ falRequestId: requestId });
+      queuedReels.push({ id: reel.id, title: reel.title, requestId });
+      logger.info(`  → Reel "${reel.title}" encolado en Kling → ${requestId}`);
+    } catch (e) {
+      logger.warn(`  ⚠ No se pudo encolar reel "${reel.title}": ${e.message}`);
+    }
+  }
+  if (queuedReels.length) logger.info(`Reels encolados en Kling: ${queuedReels.length}`);
+
+  return { generatedFiles, outputDir, queuedReels };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
