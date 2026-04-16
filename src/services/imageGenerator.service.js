@@ -147,7 +147,7 @@ function buildPostHTML(piece, client, bgDataUrl) {
   .divider{width:280px;height:3px;background:${accent};
     margin:0 auto 48px;border-radius:2px}
   .cta{
-    background:${accent};color:#fff;
+    background:${accent};color:${isLightColor(accent) ? primary : '#fff'};
     padding:22px 60px;border-radius:50px;
     font-family:${bodyFF};font-size:28px;font-weight:700;
     letter-spacing:0.5px;text-align:center;
@@ -280,7 +280,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   .body-text{font-family:${bodyFF};font-size:38px;font-weight:700;line-height:1.5;
     text-align:center;max-width:820px;color:#fff;opacity:.9;margin-bottom:52px;
     text-shadow:0 2px 10px rgba(0,0,0,0.6)}
-  .cta-btn{background:${accent};color:#fff;padding:24px 60px;
+  .cta-btn{background:${accent};color:${isLightColor(accent) ? primary : '#fff'};padding:24px 60px;
     border-radius:50px;font-family:${bodyFF};font-size:28px;
     font-weight:700;letter-spacing:0.5px;text-align:center;
     box-shadow:0 4px 20px rgba(0,0,0,0.4)}
@@ -302,9 +302,8 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   // ── SLIDES DE CONTENIDO (centro) — alternan primary / accent ─────────────
   const tSize = hookFontSize(slide.title, 62, 46);
   const bSize = slide.text && slide.text.length > 200 ? 38 : 44;
-  const logoFilter = usePrimary
-    ? 'brightness(0) invert(1)'
-    : (isLightColor(accent) ? 'none' : 'brightness(0) invert(1)');
+  // En fondo oscuro: logo sobre pastilla clara. En fondo claro: logo directo.
+  const logoBg = usePrimary ? `background:${accent};padding:10px 16px;border-radius:10px` : 'padding:4px';
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
@@ -314,7 +313,8 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;justify-content:space-between;
     padding:64px 80px;position:relative}
   .top{display:flex;justify-content:space-between;align-items:center}
-  .logo-sm{max-width:220px;max-height:88px;object-fit:contain;filter:${logoFilter};opacity:.85}
+  .logo-wrap{${logoBg};display:inline-flex;align-items:center}
+  .logo-sm{max-width:260px;max-height:100px;object-fit:contain;display:block}
   .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.4;color:${midFg}}
   .sep{width:56px;height:3px;background:${usePrimary ? accent : primary};margin:28px 0;border-radius:2px}
   .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
@@ -326,7 +326,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 <body>
   <div class="top">
     ${logoSrc
-      ? `<img class="logo-sm" src="${logoSrc}">`
+      ? `<div class="logo-wrap"><img class="logo-sm" src="${logoSrc}"></div>`
       : `<span style="opacity:.3;font-size:14px;letter-spacing:2px;font-family:${bodyFF}">${esc(client.name)}</span>`
     }
     <span class="slide-num">${slide.slide} / ${totalSlides}</span>

@@ -88,19 +88,20 @@ function fetchAsDataUrl(imageUrl) {
  * @returns {string}       - Data URL base64 lista para embeber en HTML
  */
 async function generateImage(prompt) {
-  const safePrompt = `${prompt}. Photorealistic, professional sports photography, cinematic lighting, dramatic atmosphere. No text, no words, no watermark, no logo, no team badge, no team emblem, no jersey numbers, no captions, no overlays, no graphics, no UI elements`;
+  const safePrompt = `${prompt}. Photorealistic, professional sports photography, cinematic lighting, dramatic atmosphere, clean background. ABSOLUTELY NO text, NO words, NO letters, NO watermark, NO logo, NO brand name, NO team badge, NO team emblem, NO jersey numbers, NO captions, NO overlays, NO graphics, NO UI elements, NO typography of any kind`;
 
   const body = JSON.stringify({
     prompt: safePrompt,
     image_size: 'square_hd',
     num_images: 1,
     enable_safety_checker: false,
+    guidance_scale: 3.5,
   });
 
   const data = await new Promise((resolve, reject) => {
     const options = {
       hostname: 'fal.run',
-      path: '/fal-ai/flux/schnell',
+      path: '/fal-ai/flux/dev',
       method: 'POST',
       headers: {
         'Authorization': `Key ${FAL_API_KEY}`,
