@@ -1165,11 +1165,18 @@
           ${p.visualDirection ? `<div class="piece-copy" style="margin-top:8px;font-size:12px;color:#6b7280"><strong>Dirección visual:</strong> ${p.visualDirection}</div>` : ''}
           ${p.hashtags && p.hashtags.length ? `<div class="piece-hashtags">${p.hashtags.join(' ')}</div>` : ''}
           ${p.clientComments ? `<div style="margin-top:10px;padding:10px;background:#fef9ec;border-radius:8px;font-size:13px;color:#92400e"><strong>Comentario del cliente:</strong> ${p.clientComments}</div>` : ''}
-          ${p.format !== 'reel' && p.approvalStatus !== 'aprobado' ? `
-          <div class="publish-actions">
-            <button class="btn-publish" style="background:#10b981;color:#fff" onclick="aprobarPieza(this, '${p.id}')">
-              ✅ Aprobar
-            </button>
+          ${p.format !== 'reel' && p.approvalStatus !== 'aprobado' && p.approvalStatus !== 'no_va' ? `
+          <div class="publish-actions" style="gap:8px;flex-wrap:wrap">
+            <button class="btn-publish" style="background:#10b981;color:#fff" onclick="aprobarPieza(this, '${p.id}')">✅ Aprobar</button>
+            <button class="btn-publish" style="background:#f59e0b;color:#1a1a1a" onclick="pedirCambiosPieza('${p.id}')">✎ Cambios</button>
+            <button class="btn-publish" style="background:#ef4444;color:#fff" onclick="rechazarPieza(this, '${p.id}')">✕ No va</button>
+          </div>` : ''}
+          ${p.format !== 'reel' && p.approvalStatus === 'no_va' ? `
+          <div style="margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">✕ Descartada</div>` : ''}
+          ${p.format !== 'reel' && p.approvalStatus === 'cambios' ? `
+          <div style="margin-top:8px;font-size:12px;color:#f59e0b;font-weight:600">✎ Cambios solicitados — regenera cuando quieras</div>
+          <div class="publish-actions" style="margin-top:6px">
+            <button class="btn-publish" style="background:#6366f1;color:#fff" onclick="regenerarPieza('${p.id}')">🔄 Regenerar con feedback</button>
           </div>` : ''}
           ${p.format === 'reel' && p.approvalStatus !== 'aprobado' ? `
           <div class="publish-actions">
@@ -1396,6 +1403,62 @@
       toast('Error al aprobar reel', 'error');
       btn.disabled = false;
       btn.innerHTML = '🎬 Aprobar para video';
+    }
+  }
+
+  async function rechazarPieza(btn, contentId) {
+    if (!confirm('¿Descartar esta pieza?')) return;
+    btn.disabled = true;
+    try {
+      await fetch(`${API}/api/content/${contentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approvalStatus: 'no_va' }),
+      });
+      toast('Pieza descartada', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error', 'error');
+      btn.disabled = false;
+    }
+  }
+
+  function pedirCambiosPieza(contentId) {
+    const feedback = prompt('¿Qué cambios necesita esta pieza?');
+    if (!feedback || !feedback.trim()) return;
+    solicitarCambiosPieza(contentId, feedback.trim());
+  }
+
+  async function solicitarCambiosPieza(contentId, feedback) {
+    try {
+      await fetch(`${API}/api/content/${contentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approvalStatus: 'cambios', clientComments: feedback }),
+      });
+      toast('Cambios registrados', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error', 'error');
+    }
+  }
+
+  async function regenerarPieza(contentId) {
+    const content = await fetch(`${API}/api/content/${contentId}`).then(r => r.json());
+    const feedback = content.clientComments || prompt('¿Qué cambios necesita?');
+    if (!feedback) return;
+    toast('Regenerando pieza...', 'success');
+    try {
+      const res = await fetch(`${API}/api/content/${contentId}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedback }),
+      });
+      if (!res.ok) { toast('Error al regenerar', 'error'); return; }
+      toast('Pieza regenerada', 'success');
+      loadPlanningContent(currentPlanningId);
+    } catch (e) {
+      toast('Error al regenerar', 'error');
     }
   }
 
