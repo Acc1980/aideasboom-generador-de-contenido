@@ -409,9 +409,8 @@ async function generateImages(planningId) {
       const piece = pieces[pieceIdx];
       if (piece.format === 'post') {
         // ── Foto AI de fondo ──────────────────────────────────────────────
-        const visualHint = piece.visualDirection || piece.title;
         const sport = sportFor(pieceIdx);
-        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Contexto adicional: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
+        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Estilo editorial, realista, sin texto ni logos`;
         let bgDataUrl = null;
         try {
           logger.info(`  → Generando fondo AI para post "${piece.title}"...`);
@@ -440,9 +439,8 @@ async function generateImages(planningId) {
         logger.info(`  → carrusel orden=${piece.order}: ${slides.length} slides`);
 
         // ── Una sola foto AI para portada y cierre ────────────────────────
-        const visualHint = piece.visualDirection || piece.title;
         const sport = sportFor(pieceIdx);
-        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Contexto adicional: ${visualHint}. Estilo editorial, realista, sin arte abstracto`;
+        const imagePrompt = `Fotografía deportiva profesional, ${sport}, iluminación dramática, cinematic. Estilo editorial, realista, sin texto ni logos`;
         let bgDataUrl = null;
         try {
           logger.info(`    → Generando fondo AI para carrusel "${piece.title}"...`);
