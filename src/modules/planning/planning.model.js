@@ -39,7 +39,7 @@ const Planning = sequelize.define('Planning', {
     comment: 'Semana del mes (1-4)',
   },
   packageType: {
-    type: DataTypes.ENUM('basico', 'premium', 'personalizado_7'),
+    type: DataTypes.ENUM('basico', 'premium', 'personalizado_7', 'reels_5'),
     allowNull: false,
     field: 'package_type',
   },

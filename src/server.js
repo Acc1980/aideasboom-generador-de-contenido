@@ -70,8 +70,28 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Arranque ────────────────────────────────────────────────────────
+async function runMigrations() {
+  try {
+    await sequelize.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_enum
+          WHERE enumlabel = 'reels_5'
+          AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'enum_plannings_package_type')
+        ) THEN
+          ALTER TYPE enum_plannings_package_type ADD VALUE 'reels_5';
+        END IF;
+      END $$;
+    `);
+    logger.info('Migrations OK');
+  } catch (err) {
+    logger.warn(`Migration warning: ${err.message}`);
+  }
+}
+
 async function start() {
   await testConnection();
+  await runMigrations();
 
   app.listen(PORT, () => {
     logger.info(`AIdeasBoom corriendo en puerto ${PORT} [${process.env.NODE_ENV || 'development'}]`);
