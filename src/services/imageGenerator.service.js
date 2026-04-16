@@ -379,7 +379,8 @@ async function generateImages(planningId) {
   ensureDir(outputDir);
 
   // Los reels NO generan imagen — el cliente los graba
-  const pieces = planning.contents.filter(p => p.format !== 'reel');
+  // Las piezas rechazadas (no_va) tampoco — hay que regenerar el contenido primero
+  const pieces = planning.contents.filter(p => p.format !== 'reel' && p.approvalStatus !== 'no_va');
   logger.info(`Generando imágenes para planning ${planningId} → ${pieces.length} piezas (reels excluidos)`);
 
   // Rotación de deportes para que las fotos varíen entre piezas
