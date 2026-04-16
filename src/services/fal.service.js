@@ -7,7 +7,8 @@ const http  = require('http');
 
 const FAL_API_KEY = process.env.FAL_API_KEY || 'e8a4b8e6-0284-4ee0-8b8f-cb4ab58f8421:64eaaf1100b2701a9b6ef6402c59dc63';
 const FAL_ENDPOINT = 'queue.fal.run';
-const FAL_PATH = '/fal-ai/kling-video/v1.6/pro/text-to-video';
+const FAL_PATH        = '/fal-ai/kling-video/v1.6/pro/text-to-video'; // para submit
+const FAL_QUEUE_BASE  = '/fal-ai/kling-video/requests';               // para status/result
 
 function falRequest(method, path, body = null) {
   return new Promise((resolve, reject) => {
@@ -55,13 +56,14 @@ async function submitVideo(prompt, duration = 5) {
  * @returns {{ status: string, videoUrl: string|null }}
  */
 async function checkStatus(requestId) {
-  const statusResult = await falRequest('GET', `${FAL_PATH}/requests/${requestId}/status`);
+  // Status URL: /fal-ai/kling-video/requests/{id}/status (sin versión ni path del modelo)
+  const statusResult = await falRequest('GET', `${FAL_QUEUE_BASE}/${requestId}/status`);
   const status = statusResult.status; // IN_QUEUE | IN_PROGRESS | COMPLETED | FAILED
 
   if (status !== 'COMPLETED') return { status, videoUrl: null };
 
-  // El video URL está en el endpoint de resultado, no en el de status
-  const result = await falRequest('GET', `${FAL_PATH}/requests/${requestId}`);
+  // Result URL: /fal-ai/kling-video/requests/{id}
+  const result = await falRequest('GET', `${FAL_QUEUE_BASE}/${requestId}`);
   const videoUrl = result?.output?.video?.url || result?.video?.url || null;
   return { status, videoUrl };
 }

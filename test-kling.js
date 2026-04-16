@@ -54,15 +54,16 @@ async function main() {
   console.log('\n=== 2. CHECK STATUS (espera 10s) ===');
   await new Promise(r => setTimeout(r, 10000));
 
-  // Probar el endpoint de status que tenemos actualmente
-  const s1 = await req('GET', 'queue.fal.run',
-    `/fal-ai/kling-video/v1.6/pro/text-to-video/requests/${requestId}/status`);
-  console.log('Status (path actual):', JSON.stringify(s1.body, null, 2));
+  // URL correcta devuelta por fal.ai en el submit
+  const s1 = await req('GET', 'queue.fal.run', `/fal-ai/kling-video/requests/${requestId}/status`);
+  console.log('Status (URL correcta):', JSON.stringify(s1.body, null, 2));
 
-  // Probar sin /status al final
-  const s2 = await req('GET', 'queue.fal.run',
-    `/fal-ai/kling-video/v1.6/pro/text-to-video/requests/${requestId}`);
-  console.log('Result (sin /status):', JSON.stringify(s2.body, null, 2));
+  if (s1.body?.status === 'COMPLETED') {
+    const s2 = await req('GET', 'queue.fal.run', `/fal-ai/kling-video/requests/${requestId}`);
+    console.log('Result:', JSON.stringify(s2.body, null, 2));
+  } else {
+    console.log('Video aún en proceso, status:', s1.body?.status);
+  }
 }
 
 main().catch(console.error);
