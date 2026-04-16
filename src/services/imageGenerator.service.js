@@ -114,7 +114,7 @@ function buildPostHTML(piece, client, bgDataUrl) {
   const hookHtml   = esc(piece.hook || piece.title || '').replace(/\n/g, '<br>');
 
   const bgStyle = bgDataUrl
-    ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
+    ? `background:url('${bgDataUrl}') center/cover no-repeat`
     : `background:${primary}`;
 
   return `<!DOCTYPE html>
@@ -131,7 +131,7 @@ function buildPostHTML(piece, client, bgDataUrl) {
       to bottom,
       rgba(0,0,0,0.25) 0%,
       rgba(0,0,0,0.55) 45%,
-      rgba(0,0,0,0.78) 100%
+      rgba(0,0,0,0.95) 100%
     )}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;width:100%}
