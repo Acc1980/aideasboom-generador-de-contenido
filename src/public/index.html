@@ -1262,12 +1262,14 @@
 
   function updateSheetLink(url) {
     const link = document.getElementById('linkSheet');
+    if (!link) return;
     if (url) { link.href = url; link.style.display = 'inline'; }
     else { link.style.display = 'none'; }
   }
 
   function updateDriveLink(url) {
     const link = document.getElementById('linkDrive');
+    if (!link) return;
     if (url) { link.href = url; link.style.display = 'inline'; }
     else { link.style.display = 'none'; }
   }
@@ -1283,6 +1285,7 @@
   async function exportarAprobacion() {
     if (!currentPlanningId) return;
     const btn = document.getElementById('btnExport');
+    if (!btn) return;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Creando sheet...';
     try {
@@ -1306,6 +1309,7 @@
   async function importarAprobaciones() {
     if (!currentPlanningId) return;
     const btn = document.getElementById('btnImport');
+    if (!btn) return;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Importando...';
     try {
@@ -1609,6 +1613,7 @@
   async function generarImagenes() {
     if (!currentPlanningId) return;
     const btn = document.getElementById('btnGenImgs');
+    if (!btn) return;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Generando...';
     try {
