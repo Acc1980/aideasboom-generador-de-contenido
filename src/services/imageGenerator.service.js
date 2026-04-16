@@ -230,7 +230,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   if (isFirst) {
     const fSize = hookFontSize(slide.title, 86, 56);
     const bgStyle = bgDataUrl
-      ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
+      ? `background:url('${bgDataUrl}') center/cover no-repeat`
       : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
@@ -279,7 +279,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     }
     const cierreBodyHtml = esc(cierreBody).replace(/\n/g, '<br>');
     const bgStyle = bgDataUrl
-      ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
+      ? `background:url('${bgDataUrl}') center/cover no-repeat`
       : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
