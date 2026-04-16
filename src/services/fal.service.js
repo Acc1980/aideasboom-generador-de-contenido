@@ -1,8 +1,9 @@
 /**
- * Fal.ai Service – Generación de video con Kling vía fal.ai queue API.
+ * Fal.ai Service – Video con Kling (queue) + Imagen con Flux (síncrono).
  */
 
 const https = require('https');
+const http  = require('http');
 
 const FAL_API_KEY = process.env.FAL_API_KEY || 'e8a4b8e6-0284-4ee0-8b8f-cb4ab58f8421:64eaaf1100b2701a9b6ef6402c59dc63';
 const FAL_ENDPOINT = 'queue.fal.run';
@@ -60,4 +61,70 @@ async function checkStatus(requestId) {
   return { status, videoUrl };
 }
 
-module.exports = { submitVideo, checkStatus };
+/**
+ * Descarga una URL de imagen y la devuelve como data URL base64.
+ */
+function fetchAsDataUrl(imageUrl) {
+  return new Promise((resolve, reject) => {
+    const lib = imageUrl.startsWith('https') ? https : http;
+    lib.get(imageUrl, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchAsDataUrl(res.headers.location).then(resolve).catch(reject);
+      }
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => {
+        const buf = Buffer.concat(chunks);
+        const mime = res.headers['content-type'] || 'image/jpeg';
+        resolve(`data:${mime};base64,${buf.toString('base64')}`);
+      });
+    }).on('error', reject);
+  });
+}
+
+/**
+ * Genera una imagen con fal-ai/flux/schnell (síncrono, ~3s).
+ * @param {string} prompt  - Descripción visual (del campo visualDirection del content)
+ * @returns {string}       - Data URL base64 lista para embeber en HTML
+ */
+async function generateImage(prompt) {
+  const safePrompt = `${prompt}. No text, no watermark, no logo, no words, photorealistic, professional photography`;
+
+  const body = JSON.stringify({
+    prompt: safePrompt,
+    image_size: 'square_hd',
+    num_images: 1,
+    enable_safety_checker: false,
+  });
+
+  const data = await new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'fal.run',
+      path: '/fal-ai/flux/schnell',
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${FAL_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+    const req = https.request(options, (res) => {
+      let raw = '';
+      res.on('data', (c) => { raw += c; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(raw)); }
+        catch (e) { reject(new Error('Flux parse error: ' + raw.slice(0, 200))); }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+
+  const imageUrl = data?.images?.[0]?.url;
+  if (!imageUrl) throw new Error('Flux no devolvió imagen: ' + JSON.stringify(data).slice(0, 200));
+
+  return fetchAsDataUrl(imageUrl);
+}
+
+module.exports = { submitVideo, checkStatus, generateImage };

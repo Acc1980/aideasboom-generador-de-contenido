@@ -45,6 +45,19 @@ function logoToDataUrl(logoUrl) {
   return `data:${mime};base64,${data}`;
 }
 
+/**
+ * Determina si un color hex es claro (para elegir texto oscuro/claro encima).
+ * Retorna true si la luminancia percibida > 0.5
+ */
+function isLightColor(hex) {
+  const c = hex.replace('#', '');
+  if (c.length < 6) return false;
+  const r = parseInt(c.slice(0, 2), 16) / 255;
+  const g = parseInt(c.slice(2, 4), 16) / 255;
+  const b = parseInt(c.slice(4, 6), 16) / 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.5;
+}
+
 /** Ajusta tamaño de fuente según longitud del texto */
 function hookFontSize(text, maxPx, minPx) {
   const len = (text || '').length;
@@ -83,23 +96,26 @@ function ff(fontName, type) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLANTILLA POST (1080×1080)
-// Diseño: Logo grande + Hook hero + línea decorativa + CTA.
-// El copy completo va en el caption de Instagram, NO en la imagen.
+// Fondo: foto AI a pantalla completa + overlay oscuro de marca.
+// Texto: Logo + Hook hero + CTA sobre la foto.
 // ─────────────────────────────────────────────────────────────────────────────
-function buildPostHTML(piece, client) {
+function buildPostHTML(piece, client, bgDataUrl) {
   const bi = client.brandIdentity || {};
-  const primary    = bi.primaryColor || '#8fa394';
+  const primary    = bi.primaryColor || '#1a1a2e';
   const accent     = bi.accentColor  || '#c88d74';
-  const textColor  = bi.textColor    || '#2c2c2c';
-  const lightColor = bi.lightColor   || '#e8e6e1';
+  const lightColor = bi.lightColor   || '#f0ede8';
   const titleFont  = bi.titleFont    || 'Georgia';
   const bodyFont   = bi.bodyFont     || 'Arial';
   const titleFF    = ff(titleFont, 'serif');
   const bodyFF     = ff(bodyFont, 'sans');
   const fontsImport = buildFontsImport(titleFont, bodyFont);
   const logoSrc    = logoToDataUrl(client.logoUrl);
-  const fontSize   = hookFontSize(piece.hook, 88, 62);
-  const hookHtml   = esc(piece.hook || '').replace(/\n/g, '<br>');
+  const fontSize   = hookFontSize(piece.hook, 82, 56);
+  const hookHtml   = esc(piece.hook || piece.title || '').replace(/\n/g, '<br>');
+
+  const bgStyle = bgDataUrl
+    ? `background:url('${bgDataUrl}') center/cover no-repeat`
+    : `background:${primary}`;
 
   return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -107,56 +123,54 @@ function buildPostHTML(piece, client) {
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1080px;overflow:hidden}
-  body{
-    background:${lightColor};
-    font-family:${bodyFF};
-    color:${textColor};
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    padding:80px 90px;position:relative;
-  }
-  .logo{position:absolute;top:48px;left:60px;
-    max-width:280px;max-height:110px;object-fit:contain;
-    filter:drop-shadow(0 0 3px rgba(0,0,0,0.25))}
-  .hook-wrap{text-align:center;margin-bottom:48px;max-width:920px}
+  body{${bgStyle};font-family:${bodyFF};position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:80px 90px}
+  .overlay{position:absolute;inset:0;
+    background:linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.25) 0%,
+      rgba(0,0,0,0.55) 45%,
+      rgba(0,0,0,0.75) 100%
+    )}
+  .content{position:relative;z-index:1;display:flex;flex-direction:column;
+    align-items:center;width:100%}
+  .logo{position:absolute;top:48px;left:60px;z-index:2;
+    max-width:260px;max-height:100px;object-fit:contain;
+    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+  .hook-wrap{text-align:center;margin-bottom:44px;max-width:900px}
   .hook{
-    font-family:${titleFF};
-    font-size:${fontSize}px;
-    font-style:italic;
-    font-weight:700;
-    line-height:1.35;
-    color:${primary};
+    font-family:${titleFF};font-size:${fontSize}px;
+    font-style:italic;font-weight:700;line-height:1.3;
+    color:#fff;text-shadow:0 3px 16px rgba(0,0,0,0.7);
   }
-  .divider{
-    width:300px;height:2px;
-    background:${accent};
-    margin:0 auto 56px;
-  }
+  .divider{width:280px;height:3px;background:${accent};
+    margin:0 auto 48px;border-radius:2px}
   .cta{
-    background:${accent};
-    color:${lightColor};
-    padding:22px 64px;
-    border-radius:50px;
-    font-family:${bodyFF};
-    font-size:30px;
-    font-weight:600;
-    letter-spacing:0.4px;
-    text-align:center;
+    background:${accent};color:#fff;
+    padding:22px 60px;border-radius:50px;
+    font-family:${bodyFF};font-size:28px;font-weight:700;
+    letter-spacing:0.5px;text-align:center;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
   }
 </style></head>
 <body>
+  <div class="overlay"></div>
   ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
-  <div class="hook-wrap"><span class="hook">${hookHtml}</span></div>
-  <div class="divider"></div>
-  <div class="cta">${esc(piece.cta)}</div>
+  <div class="content">
+    <div class="hook-wrap"><span class="hook">${hookHtml}</span></div>
+    <div class="divider"></div>
+    <div class="cta">${esc(piece.cta)}</div>
+  </div>
 </body></html>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLANTILLA CAROUSEL SLIDE (1080×1080)
-// Genera TODOS los slides: portada, contenido (N-2 slides), cierre con CTA
+// Portada y cierre: foto AI + overlay oscuro.
+// Slides del centro: alternan primaryColor / accentColor (ritmo visual).
 // ─────────────────────────────────────────────────────────────────────────────
-function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
+function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   const bi = client.brandIdentity || {};
   const primary    = bi.primaryColor || '#0f172a';
   const accent     = bi.accentColor  || '#a78bfa';
@@ -171,66 +185,72 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
 
   const isFirst = slide.slide === 1;
   const isLast  = slide.slide === totalSlides;
+  const isPhoto = (isFirst || isLast) && bgDataUrl;
 
-  // Portada y cierre → fondo primary (oscuro), texto lightColor (crema)
-  // Slides de contenido → fondo lightColor (crema), texto textColor (oscuro)
-  const isDark = isFirst || isLast;
-  const bg = isDark ? primary : lightColor;
-  const fg = isDark ? lightColor : textColor;
+  // Slides de contenido: alternan primary (oscuro) y accent
+  // Slide 2 → primary, Slide 3 → accent, Slide 4 → primary, ...
+  const midIndex = slide.slide - 2; // 0-based para slides del centro
+  const usePrimary = midIndex % 2 === 0;
+  const midBg = usePrimary ? primary : accent;
+  // Si el fondo es claro (accent puede ser claro), elegir texto adecuado
+  const midFg = usePrimary ? lightColor : (isLightColor(accent) ? '#1a1a1a' : lightColor);
 
   // Puntos de progreso
+  const dotColor = isPhoto ? '#fff' : (isFirst || isLast ? lightColor : accent);
   const dots = Array.from({ length: totalSlides }, (_, i) => {
     const active = i + 1 === slide.slide;
-    return `<div style="width:${active ? 20 : 7}px;height:7px;border-radius:4px;background:${accent};opacity:${active ? 1 : 0.3}"></div>`;
+    return `<div style="width:${active ? 20 : 7}px;height:7px;border-radius:4px;background:${dotColor};opacity:${active ? 0.9 : 0.25}"></div>`;
   }).join('');
 
   const titleHtml = esc(slide.title || '').replace(/\n/g, '<br>');
   const bodyHtml  = esc(slide.text  || '').replace(/\n/g, '<br>');
 
   if (isFirst) {
-    // ── PORTADA ─────────────────────────────────────────────────────────────
-    const fSize = hookFontSize(slide.title, 86, 58);
+    const fSize = hookFontSize(slide.title, 86, 56);
+    const bgStyle = bgDataUrl
+      ? `background:url('${bgDataUrl}') center/cover no-repeat`
+      : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1080px;overflow:hidden}
-  body{background:${bg};font-family:${bodyFF};color:${fg};
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:90px;position:relative}
-  .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
-  .circ{position:absolute;width:500px;height:500px;border-radius:50%;
-    border:1px solid ${accent};opacity:.1;top:-150px;right:-150px}
-  .logo{position:absolute;top:50px;left:60px;max-width:280px;max-height:110px;object-fit:contain;filter:brightness(0) invert(1)}
-  .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
-    font-size:18px;letter-spacing:2px;opacity:.4;color:${fg}}
+  body{${bgStyle};font-family:${bodyFF};position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
+  .overlay{position:absolute;inset:0;background:linear-gradient(
+    to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.6) 50%,rgba(0,0,0,0.8) 100%)}
+  .logo{position:absolute;top:50px;left:60px;z-index:2;
+    max-width:260px;max-height:100px;object-fit:contain;
+    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+  .slide-num{position:absolute;top:50px;right:60px;z-index:2;
+    font-family:${bodyFF};font-size:18px;letter-spacing:2px;opacity:.5;color:#fff}
+  .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
   .title{font-size:${fSize}px;line-height:1.2;text-align:center;font-family:${titleFF};
-    font-style:italic;max-width:840px;margin-bottom:40px}
-  .sub{font-family:${bodyFF};font-size:34px;font-weight:700;opacity:.6;text-align:center;
-    max-width:700px;line-height:1.5}
-  .swipe{position:absolute;bottom:56px;right:60px;
-    font-family:${bodyFF};font-size:20px;letter-spacing:2px;opacity:.6;color:${accent}}
-  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+    font-style:italic;font-weight:700;max-width:860px;margin-bottom:40px;color:#fff;
+    text-shadow:0 3px 16px rgba(0,0,0,0.7)}
+  .bar{width:80px;height:3px;background:${accent};border-radius:2px;margin:0 auto 32px}
+  .swipe{position:absolute;bottom:56px;right:60px;z-index:2;
+    font-family:${bodyFF};font-size:18px;letter-spacing:3px;opacity:.6;color:#fff}
+  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);z-index:2;
     display:flex;gap:6px;align-items:center}
 </style></head>
 <body>
-  <div class="bar"></div>
-  <div class="circ"></div>
+  <div class="overlay"></div>
   ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
   <span class="slide-num">1 / ${totalSlides}</span>
-  <h1 class="title">${titleHtml}</h1>
+  <div class="content">
+    <h1 class="title">${titleHtml}</h1>
+    <div class="bar"></div>
+  </div>
   <span class="swipe">Desliza →</span>
   <div class="dots">${dots}</div>
 </body></html>`;
   }
 
   if (isLast) {
-    // ── CIERRE / CTA ─────────────────────────────────────────────────────────
-    // Filtrar el texto del CTA del body para evitar duplicación
     const ctaText = (piece.cta || '').trim().toLowerCase();
     let cierreBody = (slide.text || '').trim();
     if (ctaText) {
-      // Eliminar la porción del body que coincide con el CTA (comparación flexible)
       const ctaNorm = ctaText.replace(/[^\w\sáéíóúñü]/gi, '').trim();
       const sentences = cierreBody.split(/(?<=[.!?])\s+/);
       cierreBody = sentences.filter(s => {
@@ -239,55 +259,68 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
       }).join(' ').trim();
     }
     const cierreBodyHtml = esc(cierreBody).replace(/\n/g, '<br>');
+    const bgStyle = bgDataUrl
+      ? `background:url('${bgDataUrl}') center/cover no-repeat`
+      : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1080px;overflow:hidden}
-  body{background:${bg};font-family:${bodyFF};color:${fg};
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:90px;position:relative}
-  .bar{position:absolute;left:0;top:0;bottom:0;width:7px;background:${accent}}
-  .logo{position:absolute;top:50px;left:60px;max-width:280px;max-height:110px;object-fit:contain;filter:brightness(0) invert(1)}
-  .slide-num{position:absolute;top:50px;right:60px;font-family:${bodyFF};
-    font-size:16px;letter-spacing:2px;opacity:.4;color:${fg}}
-  .body-text{font-family:${bodyFF};font-size:40px;font-weight:700;line-height:1.5;
-    text-align:center;max-width:800px;opacity:.85;margin-bottom:56px}
-  .cta-btn{background:${accent};color:${bg};padding:22px 56px;
+  body{${bgStyle};font-family:${bodyFF};position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
+  .overlay{position:absolute;inset:0;background:linear-gradient(
+    to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.65) 50%,rgba(0,0,0,0.85) 100%)}
+  .logo{position:absolute;top:50px;left:60px;z-index:2;
+    max-width:240px;max-height:96px;object-fit:contain;
+    filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+  .slide-num{position:absolute;top:50px;right:60px;z-index:2;
+    font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.5;color:#fff}
+  .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+  .body-text{font-family:${bodyFF};font-size:38px;font-weight:700;line-height:1.5;
+    text-align:center;max-width:820px;color:#fff;opacity:.9;margin-bottom:52px;
+    text-shadow:0 2px 10px rgba(0,0,0,0.6)}
+  .cta-btn{background:${accent};color:#fff;padding:24px 60px;
     border-radius:50px;font-family:${bodyFF};font-size:28px;
-    font-weight:700;letter-spacing:1px;text-align:center}
-  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+    font-weight:700;letter-spacing:0.5px;text-align:center;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+  .dots{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);z-index:2;
     display:flex;gap:6px;align-items:center}
 </style></head>
 <body>
-  <div class="bar"></div>
+  <div class="overlay"></div>
   ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
   <span class="slide-num">${slide.slide} / ${totalSlides}</span>
-  ${cierreBodyHtml ? `<p class="body-text">${cierreBodyHtml}</p>` : ''}
-  <div class="cta-btn">${esc(piece.cta)}</div>
+  <div class="content">
+    ${cierreBodyHtml ? `<p class="body-text">${cierreBodyHtml}</p>` : ''}
+    <div class="cta-btn">${esc(piece.cta)}</div>
+  </div>
   <div class="dots">${dots}</div>
 </body></html>`;
   }
 
-  // ── SLIDE DE CONTENIDO ────────────────────────────────────────────────────
-  const tSize = hookFontSize(slide.title, 62, 48);
-  const bSize = slide.text && slide.text.length > 200 ? 40 : 46;
+  // ── SLIDES DE CONTENIDO (centro) — alternan primary / accent ─────────────
+  const tSize = hookFontSize(slide.title, 62, 46);
+  const bSize = slide.text && slide.text.length > 200 ? 38 : 44;
+  const logoFilter = usePrimary
+    ? 'brightness(0) invert(1)'
+    : (isLightColor(accent) ? 'none' : 'brightness(0) invert(1)');
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1080px;overflow:hidden}
-  body{background:${bg};font-family:${bodyFF};color:${fg};
+  body{background:${midBg};font-family:${bodyFF};color:${midFg};
     display:flex;flex-direction:column;justify-content:space-between;
     padding:64px 80px;position:relative}
   .top{display:flex;justify-content:space-between;align-items:center}
-  .logo-sm{max-width:240px;max-height:96px;object-fit:contain;opacity:.9;filter:drop-shadow(0 0 2px rgba(0,0,0,0.15))}
-  .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.35;color:${fg}}
-  .sep{width:56px;height:3px;background:${accent};margin:28px 0}
+  .logo-sm{max-width:220px;max-height:88px;object-fit:contain;filter:${logoFilter};opacity:.85}
+  .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.4;color:${midFg}}
+  .sep{width:56px;height:3px;background:${usePrimary ? accent : primary};margin:28px 0;border-radius:2px}
   .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
-    color:${fg};max-width:900px}
-  .body-text{font-size:${bSize}px;line-height:1.7;color:${fg};
-    opacity:.85;max-width:900px;flex:1;padding-top:24px;font-family:${bodyFF}}
+    color:${midFg};max-width:900px}
+  .body-text{font-size:${bSize}px;line-height:1.7;color:${midFg};
+    opacity:.85;max-width:900px;flex:1;padding-top:20px;font-family:${bodyFF}}
   .dots{display:flex;gap:6px;align-items:center;padding-top:16px}
 </style></head>
 <body>
@@ -311,6 +344,8 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides) {
 // FUNCIÓN PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
 async function generateImages(planningId) {
+  const { generateImage } = require('./fal.service');
+
   const planning = await Planning.findByPk(planningId, {
     include: [
       { model: Client, as: 'client' },
@@ -339,8 +374,18 @@ async function generateImages(planningId) {
 
     for (const piece of pieces) {
       if (piece.format === 'post') {
+        // ── Foto AI de fondo ──────────────────────────────────────────────
+        const imagePrompt = piece.visualDirection || `${piece.title}, deportista, acción dinámica, fotografía editorial deportiva`;
+        let bgDataUrl = null;
+        try {
+          logger.info(`  → Generando fondo AI para post "${piece.title}"...`);
+          bgDataUrl = await generateImage(imagePrompt);
+        } catch (e) {
+          logger.warn(`  ⚠ Fal.ai falló para post ${piece.id}: ${e.message} — usando fondo de color`);
+        }
+
         await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 1 });
-        await page.setContent(buildPostHTML(piece, client), { waitUntil: 'domcontentloaded' });
+        await page.setContent(buildPostHTML(piece, client, bgDataUrl), { waitUntil: 'domcontentloaded' });
         await page.evaluate(() => document.fonts.ready);
         const filename = `post_${piece.order}.png`;
         const filePath = path.join(outputDir, filename);
@@ -357,12 +402,23 @@ async function generateImages(planningId) {
           continue;
         }
         logger.info(`  → carrusel orden=${piece.order}: ${slides.length} slides`);
-        let firstImageUrl = null;
 
+        // ── Una sola foto AI para portada y cierre ────────────────────────
+        const imagePrompt = piece.visualDirection || `${piece.title}, deportista, acción dinámica, fotografía editorial deportiva`;
+        let bgDataUrl = null;
+        try {
+          logger.info(`    → Generando fondo AI para carrusel "${piece.title}"...`);
+          bgDataUrl = await generateImage(imagePrompt);
+        } catch (e) {
+          logger.warn(`    ⚠ Fal.ai falló para carrusel ${piece.id}: ${e.message} — portada/cierre con color`);
+        }
+
+        let firstImageUrl = null;
         for (const slide of slides) {
+          const isPhotoSlide = slide.slide === 1 || slide.slide === slides.length;
           await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 1 });
           await page.setContent(
-            buildCarouselSlideHTML(slide, piece, client, slides.length),
+            buildCarouselSlideHTML(slide, piece, client, slides.length, isPhotoSlide ? bgDataUrl : null),
             { waitUntil: 'domcontentloaded' },
           );
           await page.evaluate(() => document.fonts.ready);
@@ -374,7 +430,6 @@ async function generateImages(planningId) {
           generatedFiles.push({ id: piece.id, format: 'carrusel', slideIndex: slide.slide, imageUrl, filePath });
           logger.info(`    ✓ ${filename}`);
         }
-        // Guarda la portada (slide 1) como imageUrl del Content
         if (firstImageUrl) await piece.update({ imageUrl: firstImageUrl });
       }
     }
