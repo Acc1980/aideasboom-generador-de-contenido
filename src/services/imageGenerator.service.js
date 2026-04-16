@@ -114,7 +114,7 @@ function buildPostHTML(piece, client, bgDataUrl) {
   const hookHtml   = esc(piece.hook || piece.title || '').replace(/\n/g, '<br>');
 
   const bgStyle = bgDataUrl
-    ? `background:url('${bgDataUrl}') center 15%/cover no-repeat`
+    ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
     : `background:${primary}`;
 
   return `<!DOCTYPE html>
@@ -133,8 +133,6 @@ function buildPostHTML(piece, client, bgDataUrl) {
       rgba(0,0,0,0.55) 45%,
       rgba(0,0,0,0.78) 100%
     )}
-  .bottom-cover{position:absolute;bottom:0;left:0;right:0;height:140px;
-    background:${primary};opacity:0.92;z-index:0}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;width:100%}
   .logo-wrap{position:absolute;top:48px;left:60px;z-index:2;
@@ -162,7 +160,6 @@ function buildPostHTML(piece, client, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  <div class="bottom-cover"></div>
   <div class="logo-wrap">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
     <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
@@ -233,7 +230,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   if (isFirst) {
     const fSize = hookFontSize(slide.title, 86, 56);
     const bgStyle = bgDataUrl
-      ? `background:url('${bgDataUrl}') center 15%/cover no-repeat`
+      ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
       : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
@@ -282,7 +279,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     }
     const cierreBodyHtml = esc(cierreBody).replace(/\n/g, '<br>');
     const bgStyle = bgDataUrl
-      ? `background:url('${bgDataUrl}') center 15%/cover no-repeat`
+      ? `background:url('${bgDataUrl}') center 20%/120% no-repeat`
       : `background:${primary}`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
