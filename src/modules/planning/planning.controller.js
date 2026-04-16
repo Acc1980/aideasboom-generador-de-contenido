@@ -88,6 +88,19 @@ async function getPlanningById(req, res, next) {
   }
 }
 
+async function deletePlanning(req, res, next) {
+  try {
+    const Content = require('../content/content.model');
+    const planning = await Planning.findByPk(req.params.id);
+    if (!planning) return res.status(404).json({ error: 'Planeación no encontrada' });
+    await Content.destroy({ where: { planningId: req.params.id } });
+    await planning.destroy();
+    res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function updatePlanningStatus(req, res, next) {
   try {
     const planning = await Planning.findByPk(req.params.id);
@@ -219,4 +232,5 @@ module.exports = {
   getPlanningById,
   updatePlanningStatus,
   produceAll,
+  deletePlanning,
 };

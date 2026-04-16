@@ -736,6 +736,7 @@
 <script>
   const API = '';
   let currentClientId = null;
+  let currentClientName = '';
 
   // ── Utilidades ───────────────────────────────────────────────────
   function toast(msg, type = '') {
@@ -994,6 +995,7 @@
 
   // ── Ver contenidos de un cliente ─────────────────────────────────
   async function verContenidos(clientId, clientName) {
+    currentClientName = clientName;
     document.getElementById('viewClients').style.display = 'none';
     document.getElementById('viewContent').style.display = 'block';
 
@@ -1034,6 +1036,7 @@
           <select id="planningSelect" onchange="onPlanningChange(this.value, this.options[this.selectedIndex].dataset)" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px">
             ${plannings.map(p => `<option value="${p.id}" data-sheet="${p.approvalSheetUrl||''}" data-drive="${p.driveFolderUrl||''}" data-storiessheet="${p.storiesSheetUrl||''}">S${p.week||1} · ${meses[p.month]} ${p.year} — ${p.status}</option>`).join('')}
           </select>
+          <button onclick="borrarPlaneacion()" title="Borrar planeación" style="background:#fee2e2;color:#ef4444;border:none;border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;font-weight:600">🗑 Borrar</button>
         </div>
 
         <div class="content-tabs">
@@ -1509,6 +1512,21 @@
     } else if (videosEnProceso === 0 && window._videoRefreshTimer) {
       clearInterval(window._videoRefreshTimer);
       window._videoRefreshTimer = null;
+    }
+  }
+
+  async function borrarPlaneacion() {
+    if (!currentPlanningId) return;
+    const select = document.getElementById('planningSelect');
+    const label = select ? select.options[select.selectedIndex]?.text : 'esta planeación';
+    if (!confirm(`¿Borrar "${label}" y todo su contenido? Esta acción no se puede deshacer.`)) return;
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}`, { method: 'DELETE' });
+      if (!res.ok) { toast('Error al borrar la planeación', 'error'); return; }
+      toast('Planeación borrada', 'success');
+      setTimeout(() => verContenidos(currentClientId, currentClientName), 500);
+    } catch (e) {
+      toast('Error al borrar', 'error');
     }
   }
 

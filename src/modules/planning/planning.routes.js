@@ -16,6 +16,7 @@ router.post('/generate', ctrl.generatePlanning);
 router.post('/:id/generate-format', longTimeout, ctrl.generateFormat);
 router.post('/:id/generate-images', longTimeout, ctrl.generateImages);
 router.post('/:id/produce-all', ctrl.produceAll);
+router.delete('/:id', ctrl.deletePlanning);
 router.get('/client/:clientId', ctrl.getPlanningsByClient);
 router.get('/:id', ctrl.getPlanningById);
 router.patch('/:id/status', ctrl.updatePlanningStatus);
