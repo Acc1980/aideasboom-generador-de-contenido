@@ -55,8 +55,13 @@ async function submitVideo(prompt, duration = 5) {
  * @returns {{ status: string, videoUrl: string|null }}
  */
 async function checkStatus(requestId) {
-  const result = await falRequest('GET', `${FAL_PATH}/requests/${requestId}/status`);
-  const status = result.status; // IN_QUEUE | IN_PROGRESS | COMPLETED | FAILED
+  const statusResult = await falRequest('GET', `${FAL_PATH}/requests/${requestId}/status`);
+  const status = statusResult.status; // IN_QUEUE | IN_PROGRESS | COMPLETED | FAILED
+
+  if (status !== 'COMPLETED') return { status, videoUrl: null };
+
+  // El video URL está en el endpoint de resultado, no en el de status
+  const result = await falRequest('GET', `${FAL_PATH}/requests/${requestId}`);
   const videoUrl = result?.output?.video?.url || result?.video?.url || null;
   return { status, videoUrl };
 }
