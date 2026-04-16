@@ -30,6 +30,9 @@ const eventRoutes = require('./modules/events/events.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Confiar en el proxy inverso (Traefik) para X-Forwarded-For
+app.set('trust proxy', 1);
+
 // ── Middlewares globales ────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
