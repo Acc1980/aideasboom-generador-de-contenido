@@ -1047,22 +1047,7 @@
         <!-- Tab: Contenidos -->
         <div id="tabContenidos">
           <div class="approval-bar" id="approvalBar">
-            <button class="btn btn-sm" id="btnGenImgs" style="background:#f48a81;color:white" onclick="generarImagenes()">
-              Generar imágenes
-            </button>
-            <button class="btn btn-sm" id="btnExport" style="background:#16385d;color:white" onclick="exportarAprobacion()">
-              Exportar aprobación
-            </button>
-            <button class="btn btn-sm" id="btnImport" style="background:white;color:#16385d;border:1.5px solid #16385d" onclick="importarAprobaciones()">
-              Importar aprobaciones
-            </button>
-            <a id="linkSheet" href="#" target="_blank" style="display:none;font-size:13px;color:#16385d;font-weight:600;text-decoration:none">
-              Abrir sheet →
-            </a>
-            <a id="linkDrive" href="#" target="_blank" style="display:none;font-size:13px;color:#f48a81;font-weight:600;text-decoration:none">
-              Ver en Drive →
-            </a>
-            <button class="btn btn-sm" id="btnProducirTodo" style="background:#7c3aed;color:white;display:none" onclick="producirTodo()">
+            <button class="btn btn-sm" id="btnProducirTodo" onclick="producirTodo()" style="background:#7c3aed;color:white">
               🚀 Producir todo
             </button>
           </div>
@@ -1524,8 +1509,7 @@
       videosListos > 0 ? `🎬 ${videosListos} videos listos` : '';
 
     const btnProd = document.getElementById('btnProducirTodo');
-    const todoAprobado = aprobados === total && total > 0;
-    btnProd.style.display = todoAprobado ? 'inline-flex' : 'none';
+    btnProd.style.display = total > 0 ? 'inline-flex' : 'none';
 
     // Si hay videos generándose, auto-refresh cada 30s
     if (videosEnProceso > 0 && !window._videoRefreshTimer) {
