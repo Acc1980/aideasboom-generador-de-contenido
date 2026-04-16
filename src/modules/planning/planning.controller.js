@@ -192,19 +192,23 @@ async function produceAll(req, res, next) {
 
     const pieces = await Content.findAll({ where: { planningId: id }, order: [['order', 'ASC']] });
 
-    const notApproved = pieces.filter(p => p.approvalStatus !== 'aprobado');
+    // Las piezas no_va se ignoran — solo exigir que las activas estén aprobadas
+    const activePieces = pieces.filter(p => p.approvalStatus !== 'no_va');
+    const notApproved = activePieces.filter(p => p.approvalStatus !== 'aprobado');
     if (notApproved.length > 0) {
       return res.status(400).json({
         error: `Quedan ${notApproved.length} piezas sin aprobar. Aprueba todo antes de producir.`,
-        pending: notApproved.map(p => ({ id: p.id, format: p.format, title: p.title })),
+        pending: notApproved.map(p => ({ id: p.id, format: p.format, title: p.title, approvalStatus: p.approvalStatus })),
       });
     }
 
-    // Imágenes: lanzar en background
+    // Imágenes: lanzar en background (solo aprobadas, no_va ya filtradas en generateImages)
     genImages(id).catch(e => logger.warn('Error generando imágenes: ' + e.message));
 
-    // Videos: enviar reels a fal.ai
-    const reels = pieces.filter(p => p.format === 'reel' && !p.videoUrl && !p.falRequestId);
+    // Videos: reels aprobados sin video ni request en curso
+    const reels = pieces.filter(p =>
+      p.format === 'reel' && p.approvalStatus === 'aprobado' && !p.videoUrl && !p.falRequestId,
+    );
     let videosSent = 0;
     for (const reel of reels) {
       try {
