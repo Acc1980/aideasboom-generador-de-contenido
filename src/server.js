@@ -83,6 +83,9 @@ async function runMigrations() {
         END IF;
       END $$;
     `);
+    await sequelize.query(`
+      ALTER TABLE contents ADD COLUMN IF NOT EXISTS scheduled_date DATE;
+    `);
     logger.info('Migrations OK');
   } catch (err) {
     logger.warn(`Migration warning: ${err.message}`);

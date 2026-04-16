@@ -90,6 +90,12 @@ const Content = sequelize.define('Content', {
     defaultValue: 0,
     comment: 'Orden de publicación dentro del mes',
   },
+  scheduledDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'scheduled_date',
+    comment: 'Fecha de publicación asignada (YYYY-MM-DD)',
+  },
   imageUrl: {
     type: DataTypes.STRING,
     allowNull: true,

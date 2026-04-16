@@ -23,6 +23,72 @@ const logger = require('../config/logger');
 const FORMAT_KEY = { post: 'posts', carrusel: 'carruseles', reel: 'reels' };
 
 /**
+ * Calcula el lunes de la semana N del mes.
+ * Semana 1 = primer lunes del mes, semana 2 = segundo lunes, etc.
+ */
+function getWeekMonday(year, month, week) {
+  const firstDay = new Date(Date.UTC(year, month - 1, 1));
+  const dow = firstDay.getUTCDay(); // 0=Dom, 1=Lun ... 6=Sab
+  const daysToMonday = dow === 0 ? 1 : dow === 1 ? 0 : (8 - dow);
+  const monday = new Date(Date.UTC(year, month - 1, 1 + daysToMonday + (week - 1) * 7));
+  return monday;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Asigna fechas de publicación a todas las piezas del planning.
+ * Calendario fijo:
+ *   Lunes    → Reel 1
+ *   Martes   → Reel 2 + Carrusel 1
+ *   Miércoles → Reel 3 + Post 1
+ *   Jueves   → Reel 4 + Carrusel 2
+ *   Viernes  → Reel 5
+ */
+async function assignScheduledDates(planningId) {
+  const planning = await Planning.findByPk(planningId);
+  if (!planning) return;
+
+  const monday = getWeekMonday(planning.year, planning.month, planning.week);
+
+  // Días de la semana por formato (offset desde el lunes)
+  const reelDays   = [0, 1, 2, 3, 4]; // Lun, Mar, Mié, Jue, Vie
+  const carruselDays = [1, 3];         // Mar, Jue
+  const postDays   = [2];              // Mié
+
+  const pieces = await Content.findAll({
+    where: { planningId },
+    order: [['order', 'ASC']],
+  });
+
+  const byFormat = { reel: [], carrusel: [], post: [] };
+  for (const p of pieces) {
+    if (byFormat[p.format]) byFormat[p.format].push(p);
+  }
+
+  const updates = [];
+  for (const [i, p] of byFormat.reel.entries()) {
+    const day = reelDays[i];
+    if (day !== undefined) updates.push(p.update({ scheduledDate: addDays(monday, day) }));
+  }
+  for (const [i, p] of byFormat.carrusel.entries()) {
+    const day = carruselDays[i];
+    if (day !== undefined) updates.push(p.update({ scheduledDate: addDays(monday, day) }));
+  }
+  for (const [i, p] of byFormat.post.entries()) {
+    const day = postDays[i];
+    if (day !== undefined) updates.push(p.update({ scheduledDate: addDays(monday, day) }));
+  }
+
+  await Promise.all(updates);
+  logger.info(`Fechas asignadas para planning ${planningId} (semana del ${addDays(monday, 0)})`);
+}
+
+/**
  * Crea el registro Planning con su distribución calculada.
  * No genera contenido — solo inicializa la planeación.
  */
@@ -151,6 +217,8 @@ async function generateFormat(planningId, format, { replace = false } = {}) {
 
   await Content.bulkCreate(contentRecords);
   logger.info(`${contentRecords.length} ${format}(s) guardados para planning ${planningId}`);
+
+  await assignScheduledDates(planningId);
 
   return { generated: contentRecords.length, format };
 }

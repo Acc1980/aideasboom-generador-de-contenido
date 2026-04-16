@@ -1153,6 +1153,7 @@
             <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px;background:${approvalColors[p.approvalStatus||'pendiente']};color:#374151">
               ${approvalLabels[p.approvalStatus||'pendiente']}
             </span>
+            ${p.scheduledDate ? `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px;background:#e0f2fe;color:#0369a1">📅 ${new Date(p.scheduledDate + 'T12:00:00').toLocaleDateString('es-CO', {weekday:'short', day:'numeric', month:'short'})}</span>` : ''}
             <span style="font-size:12px;color:#9ca3af;margin-left:auto">Pieza ${p.order}</span>
             ${currentClientLogoUrl ? `<img class="piece-logo" src="${currentClientLogoUrl}" alt="logo" onerror="this.style.display='none'">` : ''}
           </div>
@@ -1457,7 +1458,7 @@
     basico:          { reels: 2, posts: 2, carruseles: 2 },
     premium:         { reels: 3, posts: 4, carruseles: 4 },
     personalizado_7: { reels: 2, posts: 2, carruseles: 3 },
-    reels_5:         { reels: 5, posts: 0, carruseles: 0 },
+    reels_5:         { reels: 5, posts: 1, carruseles: 2 },
   };
   function buildDistributionBadges(packageType, brandIdentity) {
     const bi = brandIdentity || {};

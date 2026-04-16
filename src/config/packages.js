@@ -31,9 +31,9 @@ const PACKAGES = {
   reels_5: {
     label: '5 Reels por semana',
     reels: 5,
-    posts: 2,
+    posts: 1,
     carruseles: 2,
-    total: 9,
+    total: 8,
   },
 };
 
