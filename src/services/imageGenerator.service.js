@@ -212,6 +212,13 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   const titleHtml = esc(slide.title || '').replace(/\n/g, '<br>');
   const bodyHtml  = esc(slide.text  || '').replace(/\n/g, '<br>');
 
+  // Logo horizontal reutilizable para slides con foto (fondo oscuro)
+  const logoBlockPhoto = logoSrc ? `
+    <div style="position:absolute;top:50px;left:60px;z-index:2;display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);padding:12px 20px;border-radius:12px">
+      <img src="${logoSrc}" style="max-width:60px;max-height:60px;object-fit:contain;display:block">
+      <span style="font-family:${bodyFF};font-size:20px;font-weight:700;color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap">${esc(client.name || '')}</span>
+    </div>` : '';
+
   if (isFirst) {
     const fSize = hookFontSize(slide.title, 86, 56);
     const bgStyle = bgDataUrl
@@ -226,9 +233,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
   .overlay{position:absolute;inset:0;background:linear-gradient(
     to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.6) 50%,rgba(0,0,0,0.8) 100%)}
-  .logo{position:absolute;top:50px;left:60px;z-index:2;
-    max-width:260px;max-height:100px;object-fit:contain;
-    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:18px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -243,7 +247,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  ${logoBlockPhoto}
   <span class="slide-num">1 / ${totalSlides}</span>
   <div class="content">
     <h1 class="title">${titleHtml}</h1>
@@ -278,9 +282,6 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px}
   .overlay{position:absolute;inset:0;background:linear-gradient(
     to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.65) 50%,rgba(0,0,0,0.85) 100%)}
-  .logo{position:absolute;top:50px;left:60px;z-index:2;
-    max-width:240px;max-height:96px;object-fit:contain;
-    filter:drop-shadow(0 2px 12px rgba(0,0,0,0.8))}
   .slide-num{position:absolute;top:50px;right:60px;z-index:2;
     font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.5;color:#fff}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -296,7 +297,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 </style></head>
 <body>
   <div class="overlay"></div>
-  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  ${logoBlockPhoto}
   <span class="slide-num">${slide.slide} / ${totalSlides}</span>
   <div class="content">
     ${cierreBodyHtml ? `<p class="body-text">${cierreBodyHtml}</p>` : ''}
@@ -309,8 +310,9 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   // ── SLIDES DE CONTENIDO (centro) — alternan primary / accent ─────────────
   const tSize = hookFontSize(slide.title, 62, 46);
   const bSize = slide.text && slide.text.length > 200 ? 38 : 44;
-  // En fondo oscuro: logo sobre pastilla clara. En fondo claro: logo directo.
-  const logoBg = usePrimary ? `background:${accent};padding:10px 16px;border-radius:10px` : 'padding:4px';
+  // En fondo oscuro: pastilla dorada. En fondo claro: sin fondo extra.
+  const wrapBg   = usePrimary ? `background:${accent};padding:10px 16px;border-radius:10px` : 'padding:4px 0';
+  const nameColor = usePrimary ? primary : primary;
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
@@ -320,8 +322,9 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
     display:flex;flex-direction:column;justify-content:space-between;
     padding:64px 80px;position:relative}
   .top{display:flex;justify-content:space-between;align-items:center}
-  .logo-wrap{${logoBg};display:inline-flex;align-items:center}
-  .logo-sm{max-width:260px;max-height:100px;object-fit:contain;display:block}
+  .logo-wrap{${wrapBg};display:inline-flex;align-items:center;gap:12px}
+  .logo-sm{max-width:60px;max-height:60px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:20px;font-weight:700;color:${nameColor};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .slide-num{font-family:${bodyFF};font-size:16px;letter-spacing:2px;opacity:.4;color:${midFg}}
   .sep{width:56px;height:3px;background:${usePrimary ? accent : primary};margin:28px 0;border-radius:2px}
   .title{font-size:${tSize}px;line-height:1.25;font-weight:700;font-family:${titleFF};
@@ -333,7 +336,7 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
 <body>
   <div class="top">
     ${logoSrc
-      ? `<div class="logo-wrap"><img class="logo-sm" src="${logoSrc}"></div>`
+      ? `<div class="logo-wrap"><img class="logo-sm" src="${logoSrc}"><span class="logo-name">${esc(client.name || '')}</span></div>`
       : `<span style="opacity:.3;font-size:14px;letter-spacing:2px;font-family:${bodyFF}">${esc(client.name)}</span>`
     }
     <span class="slide-num">${slide.slide} / ${totalSlides}</span>
