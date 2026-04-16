@@ -1059,6 +1059,15 @@
             <a id="linkDrive" href="#" target="_blank" style="display:none;font-size:13px;color:#f48a81;font-weight:600;text-decoration:none">
               Ver en Drive →
             </a>
+            <button class="btn btn-sm" id="btnProducirTodo" style="background:#7c3aed;color:white;display:none" onclick="producirTodo()">
+              🚀 Producir todo
+            </button>
+          </div>
+          <div id="statusBar" style="display:none;padding:10px 0;font-size:13px;color:#374151;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <span id="statusAprobados" style="color:#10b981;font-weight:600"></span>
+            <span id="statusPendientes" style="color:#f59e0b;font-weight:600"></span>
+            <span id="statusNoVa" style="color:#ef4444;font-weight:600"></span>
+            <span id="statusVideos" style="color:#6366f1;font-weight:600"></span>
           </div>
           <div id="piecesList" class="content-list"></div>
         </div>
@@ -1234,6 +1243,8 @@
           </div>` : ''}
         </div>
       `).join('');
+
+      updateStatusBar(pieces);
     } catch (e) {
       list.innerHTML = '<div class="empty"><p>Error al cargar piezas.</p></div>';
     }
@@ -1466,6 +1477,60 @@
       loadPlanningContent(currentPlanningId);
     } catch (e) {
       toast('Error al regenerar', 'error');
+    }
+  }
+
+  function updateStatusBar(pieces) {
+    const aprobados = pieces.filter(p => p.approvalStatus === 'aprobado').length;
+    const pendientes = pieces.filter(p => p.approvalStatus === 'pendiente' || p.approvalStatus === 'cambios').length;
+    const noVa = pieces.filter(p => p.approvalStatus === 'no_va').length;
+    const videosEnProceso = pieces.filter(p => p.format === 'reel' && p.falRequestId && !p.videoUrl).length;
+    const videosListos = pieces.filter(p => p.format === 'reel' && p.videoUrl).length;
+    const total = pieces.length;
+
+    const bar = document.getElementById('statusBar');
+    bar.style.display = total > 0 ? 'flex' : 'none';
+    document.getElementById('statusAprobados').textContent = `✅ ${aprobados}/${total} aprobados`;
+    document.getElementById('statusPendientes').textContent = pendientes > 0 ? `⏳ ${pendientes} pendientes` : '';
+    document.getElementById('statusNoVa').textContent = noVa > 0 ? `✕ ${noVa} no van` : '';
+    document.getElementById('statusVideos').textContent =
+      videosEnProceso > 0 ? `🎬 ${videosEnProceso} generando video...` :
+      videosListos > 0 ? `🎬 ${videosListos} videos listos` : '';
+
+    const btnProd = document.getElementById('btnProducirTodo');
+    const todoAprobado = aprobados === total && total > 0;
+    btnProd.style.display = todoAprobado ? 'inline-flex' : 'none';
+
+    // Si hay videos generándose, auto-refresh cada 30s
+    if (videosEnProceso > 0 && !window._videoRefreshTimer) {
+      window._videoRefreshTimer = setInterval(() => {
+        loadPlanningContent(currentPlanningId);
+      }, 30000);
+    } else if (videosEnProceso === 0 && window._videoRefreshTimer) {
+      clearInterval(window._videoRefreshTimer);
+      window._videoRefreshTimer = null;
+    }
+  }
+
+  async function producirTodo() {
+    const btn = document.getElementById('btnProducirTodo');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Iniciando...';
+    try {
+      const res = await fetch(`${API}/api/planning/${currentPlanningId}/produce-all`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Error al producir', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🚀 Producir todo';
+        return;
+      }
+      toast(`Producción iniciada — ${data.videosSent} videos enviados a fal.ai`, 'success');
+      setTimeout(() => loadPlanningContent(currentPlanningId), 1000);
+    } catch (e) {
+      toast('Error al producir', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Producir todo';
     }
   }
 

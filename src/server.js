@@ -86,15 +86,53 @@ async function runMigrations() {
     await sequelize.query(`
       ALTER TABLE contents ADD COLUMN IF NOT EXISTS scheduled_date DATE;
     `);
+    await sequelize.query(`
+      ALTER TABLE contents ADD COLUMN IF NOT EXISTS fal_request_id VARCHAR(255);
+    `);
     logger.info('Migrations OK');
   } catch (err) {
     logger.warn(`Migration warning: ${err.message}`);
   }
 }
 
+async function startVideoPoller() {
+  const { checkStatus } = require('./services/fal.service');
+  const Content = require('./modules/content/content.model');
+  const { Op } = require('sequelize');
+
+  async function poll() {
+    try {
+      const pending = await Content.findAll({
+        where: { falRequestId: { [Op.ne]: null }, videoUrl: null },
+      });
+      for (const content of pending) {
+        try {
+          const { status, videoUrl } = await checkStatus(content.falRequestId);
+          if (status === 'COMPLETED' && videoUrl) {
+            await content.update({ videoUrl, status: 'reviewed', falRequestId: null });
+            logger.info(`Video listo para "${content.title}": ${videoUrl}`);
+          } else if (status === 'FAILED') {
+            await content.update({ falRequestId: null });
+            logger.warn(`Video falló para "${content.title}"`);
+          }
+        } catch (e) {
+          logger.warn(`Error chequeando fal.ai para ${content.id}: ${e.message}`);
+        }
+      }
+    } catch (e) {
+      logger.warn('Error en video poller: ' + e.message);
+    }
+  }
+
+  setInterval(poll, 30000);
+  logger.info('Video poller iniciado (cada 30s)');
+}
+
 async function start() {
   await testConnection();
   await runMigrations();
+
+  startVideoPoller();
 
   app.listen(PORT, () => {
     logger.info(`AIdeasBoom corriendo en puerto ${PORT} [${process.env.NODE_ENV || 'development'}]`);

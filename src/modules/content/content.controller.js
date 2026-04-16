@@ -134,6 +134,26 @@ async function updateVideoUrl(req, res, next) {
   }
 }
 
+// Envía un reel aprobado a fal.ai para generar el video
+async function generateVideo(req, res, next) {
+  try {
+    const { submitVideo } = require('../../services/fal.service');
+    const content = await Content.findByPk(req.params.id);
+    if (!content) return res.status(404).json({ error: 'Contenido no encontrado' });
+    if (content.format !== 'reel') return res.status(400).json({ error: 'Solo aplica para reels' });
+    if (content.approvalStatus !== 'aprobado') return res.status(400).json({ error: 'El reel debe estar aprobado primero' });
+
+    const prompt = content.script?.prompt || content.visualDirection || content.title;
+    const requestId = await submitVideo(prompt, content.script?.duration || 5);
+    await content.update({ falRequestId: requestId });
+
+    logger.info(`Video enviado a fal.ai para "${content.title}" → ${requestId}`);
+    res.json({ ok: true, requestId });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getContentsByPlanning,
   getContentById,
@@ -143,4 +163,5 @@ module.exports = {
   approveVideo,
   getPendingVideo,
   updateVideoUrl,
+  generateVideo,
 };

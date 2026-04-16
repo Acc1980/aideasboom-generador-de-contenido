@@ -96,6 +96,12 @@ const Content = sequelize.define('Content', {
     field: 'scheduled_date',
     comment: 'Fecha de publicación asignada (YYYY-MM-DD)',
   },
+  falRequestId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'fal_request_id',
+    comment: 'ID de la solicitud de video en fal.ai',
+  },
   imageUrl: {
     type: DataTypes.STRING,
     allowNull: true,

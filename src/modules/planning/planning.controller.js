@@ -163,6 +163,54 @@ async function generateImages(req, res, next) {
   }
 }
 
+/**
+ * POST /api/planning/:id/produce-all
+ * Verifica que todo esté aprobado y lanza producción:
+ * - Posts/carruseles: genera imágenes
+ * - Reels: envía a fal.ai para video
+ * Responde inmediatamente; la producción corre en background.
+ */
+async function produceAll(req, res, next) {
+  try {
+    const { id } = req.params;
+    const Content = require('../content/content.model');
+    const { submitVideo } = require('../../services/fal.service');
+    const { Op } = require('sequelize');
+
+    const pieces = await Content.findAll({ where: { planningId: id }, order: [['order', 'ASC']] });
+
+    const notApproved = pieces.filter(p => p.approvalStatus !== 'aprobado');
+    if (notApproved.length > 0) {
+      return res.status(400).json({
+        error: `Quedan ${notApproved.length} piezas sin aprobar. Aprueba todo antes de producir.`,
+        pending: notApproved.map(p => ({ id: p.id, format: p.format, title: p.title })),
+      });
+    }
+
+    // Imágenes: lanzar en background
+    genImages(id).catch(e => logger.warn('Error generando imágenes: ' + e.message));
+
+    // Videos: enviar reels a fal.ai
+    const reels = pieces.filter(p => p.format === 'reel' && !p.videoUrl && !p.falRequestId);
+    let videosSent = 0;
+    for (const reel of reels) {
+      try {
+        const prompt = reel.script?.prompt || reel.visualDirection || reel.title;
+        const requestId = await submitVideo(prompt, reel.script?.duration || 5);
+        await reel.update({ falRequestId: requestId });
+        videosSent++;
+      } catch (e) {
+        logger.warn(`No se pudo enviar reel "${reel.title}" a fal.ai: ${e.message}`);
+      }
+    }
+
+    logger.info(`Producción iniciada para planning ${id}: imágenes en background, ${videosSent} reels a fal.ai`);
+    res.json({ ok: true, videosSent, message: 'Producción iniciada. Los videos estarán listos en ~2-3 minutos.' });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   generatePlanning,
   generateFormat,
@@ -170,4 +218,5 @@ module.exports = {
   getPlanningsByClient,
   getPlanningById,
   updatePlanningStatus,
+  produceAll,
 };
