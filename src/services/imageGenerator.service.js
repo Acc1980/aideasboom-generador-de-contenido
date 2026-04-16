@@ -197,20 +197,20 @@ function buildCarouselSlideHTML(slide, piece, client, totalSlides, bgDataUrl) {
   const isLast  = slide.slide === totalSlides;
   const isPhoto = (isFirst || isLast) && bgDataUrl;
 
-  // Paleta manual La Zona Campeón: oscuro + 2 claros alternantes
-  const MID_LIGHT1 = '#fdf0ec'; // rosado muy tenue
-  const MID_LIGHT2 = '#f5e8d0'; // beige cálido
+  // Paleta manual La Zona Campeón: azul oscuro + 2 beiges derivados del dorado
+  const MID_LIGHT1 = '#faf2e4'; // crema muy suave (gold muy claro)
+  const MID_LIGHT2 = '#f0e2c4'; // beige cálido (gold medio-claro)
 
-  // Rotación de 3 colores: dark → light1 → light2 → dark → ...
+  // Rotación de 3 colores: dark → crema → beige → dark → ...
   const midIndex = slide.slide - 2; // 0-based para slides del centro
   const rotation = ((midIndex % 3) + 3) % 3;
   let midBg, midFg, midSepColor, midIsLight;
   if (rotation === 0) {
-    midBg = primary; midFg = accent; midSepColor = accent; midIsLight = false;
+    midBg = primary;    midFg = accent;   midSepColor = accent;   midIsLight = false;
   } else if (rotation === 1) {
-    midBg = MID_LIGHT1; midFg = primary; midSepColor = accent; midIsLight = true;
+    midBg = MID_LIGHT1; midFg = primary;  midSepColor = primary;  midIsLight = true;
   } else {
-    midBg = MID_LIGHT2; midFg = primary; midSepColor = primary; midIsLight = true;
+    midBg = MID_LIGHT2; midFg = primary;  midSepColor = primary;  midIsLight = true;
   }
 
   // Puntos de progreso
