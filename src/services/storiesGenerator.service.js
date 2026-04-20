@@ -22,6 +22,25 @@ const DAY_LABELS = {
   5: 'Viernes', 6: 'Sábado',
 };
 
+/**
+ * Calcula la fecha real (YYYY-MM-DD) de una story dado el año, mes,
+ * semana del mes (1-4) y día de la semana (1=Lunes … 6=Sábado).
+ */
+function getStoryScheduledDate(year, month, week, dayOfWeek) {
+  // Primer día del bloque semanal: 1, 8, 15 o 22
+  const refDay = 1 + (Math.max(1, Math.min(4, week)) - 1) * 7;
+  const ref = new Date(year, month - 1, refDay);
+  // Retroceder hasta el Lunes de esa semana (JS: 0=Dom, 1=Lun … 6=Sáb)
+  const jsDay = ref.getDay();
+  const daysToMonday = jsDay === 0 ? -6 : 1 - jsDay;
+  const monday = new Date(ref);
+  monday.setDate(ref.getDate() + daysToMonday);
+  // Avanzar al día exacto de la story
+  const result = new Date(monday);
+  result.setDate(monday.getDate() + (dayOfWeek - 1));
+  return result.toISOString().slice(0, 10);
+}
+
 const ACTIVE_DAYS = 6; // Lunes a Sábado (sin Domingo)
 
 /**
@@ -104,12 +123,13 @@ async function generateStories(planningId, { replace = false, storiesPerDay = 5 
       dayLabel: s.dayLabel || DAY_LABELS[s.dayOfWeek] || `Día ${s.dayOfWeek}`,
       order: s.order,
       storyType: s.storyType,
-      isRecorded: s.isRecorded || false,
+      isRecorded: false,
       script: s.script || null,
       textContent: s.textContent || null,
       visualDirection: s.visualDirection || null,
       cta: s.cta || null,
       stickerSuggestion: s.stickerSuggestion || null,
+      scheduledDate: getStoryScheduledDate(planning.year, planning.month, planning.week, s.dayOfWeek),
       status: 'generated',
       approvalStatus: 'pendiente',
     };

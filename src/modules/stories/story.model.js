@@ -109,6 +109,12 @@ const Story = sequelize.define('Story', {
     field: 'client_comments',
     comment: 'Comentarios del cliente desde el sheet de aprobación',
   },
+  scheduledDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'scheduled_date',
+    comment: 'Fecha de publicación calculada automáticamente (YYYY-MM-DD)',
+  },
 }, {
   tableName: 'stories',
   underscored: true,

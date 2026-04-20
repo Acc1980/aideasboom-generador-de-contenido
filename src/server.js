@@ -50,6 +50,10 @@ app.use('/api', limiter);
 // ── Panel web ────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ── Reels generados (servidos estáticamente) ─────────────────────────
+const REELS_DIR = process.env.REELS_DIR || '/var/www/aideasboom/reels';
+app.use('/reels', express.static(REELS_DIR));
+
 // ── Rutas API ────────────────────────────────────────────────────────
 app.use('/api/clients', clientRoutes);
 app.use('/api/strategy', strategyRoutes);
@@ -91,6 +95,9 @@ async function runMigrations() {
     `);
     await sequelize.query(`
       ALTER TABLE contents ADD COLUMN IF NOT EXISTS fal_request_id VARCHAR(255);
+    `);
+    await sequelize.query(`
+      ALTER TABLE stories ADD COLUMN IF NOT EXISTS scheduled_date DATE;
     `);
     logger.info('Migrations OK');
   } catch (err) {
@@ -136,6 +143,12 @@ async function start() {
   await runMigrations();
 
   startVideoPoller();
+
+  const { startPublisherScheduler } = require('./services/publisher.scheduler');
+  startPublisherScheduler();
+
+  const { startStoryPublisherScheduler } = require('./services/storyPublisher.scheduler');
+  startStoryPublisherScheduler();
 
   app.listen(PORT, () => {
     logger.info(`AIdeasBoom corriendo en puerto ${PORT} [${process.env.NODE_ENV || 'development'}]`);
