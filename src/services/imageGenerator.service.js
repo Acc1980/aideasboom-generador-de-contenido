@@ -527,8 +527,13 @@ function buildStoryTextHTML(story, client) {
     border-top:3px solid ${accent};border-left:3px solid ${accent};opacity:0.5}
   .corner-br{position:absolute;bottom:0;right:0;width:180px;height:180px;
     border-bottom:3px solid ${accent};border-right:3px solid ${accent};opacity:0.5}
-  .logo{position:absolute;top:90px;left:50%;transform:translateX(-50%);
-    max-width:480px;max-height:192px;object-fit:contain;opacity:0.9}
+  .logo-wrap{position:absolute;top:72px;left:60px;z-index:2;
+    display:inline-flex;align-items:center;gap:14px;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);
+    padding:14px 22px;border-radius:14px}
+  .logo{max-width:72px;max-height:72px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:26px;font-weight:700;
+    color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .divider{width:80px;height:3px;background:${accent};margin-bottom:60px;border-radius:2px}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:900px;margin-bottom:60px;
@@ -541,7 +546,10 @@ function buildStoryTextHTML(story, client) {
   <div class="bg-glow"></div>
   <div class="corner-tl"></div>
   <div class="corner-br"></div>
-  ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+  <div class="logo-wrap">
+    ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
+  </div>
   <div class="divider"></div>
   <div class="main-text">${textHtml}</div>
   <div class="divider-b"></div>
@@ -583,7 +591,13 @@ function buildStoryInteractiveHTML(story, client) {
     align-items:center;justify-content:center;padding:120px 90px 40px;position:relative}
   .bottom-zone{flex:0 0 38%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:20px 90px 120px}
-  .logo{max-width:480px;max-height:192px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .logo-wrap{position:absolute;top:72px;left:60px;z-index:2;
+    display:inline-flex;align-items:center;gap:14px;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);
+    padding:14px 22px;border-radius:14px}
+  .logo{max-width:72px;max-height:72px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:26px;font-weight:700;
+    color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:880px;
     text-shadow:0 2px 20px rgba(0,0,0,0.5)}
@@ -596,8 +610,11 @@ function buildStoryInteractiveHTML(story, client) {
 </style></head><body>
   <div class="bg-stripe"></div>
   <div class="bg-stripe-b"></div>
-  <div class="top-zone">
+  <div class="logo-wrap">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
+  </div>
+  <div class="top-zone">
     <div class="main-text">${textHtml}</div>
     <div class="divider"></div>
   </div>
@@ -645,7 +662,13 @@ function buildStoryCtaHTML(story, client) {
     border-bottom:4px solid ${accent};border-right:4px solid ${accent}}
   .content{position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;width:100%;gap:0}
-  .logo{max-width:220px;max-height:88px;object-fit:contain;margin-bottom:80px;opacity:0.95}
+  .logo-wrap{position:absolute;top:72px;left:60px;z-index:2;
+    display:inline-flex;align-items:center;gap:14px;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);
+    padding:14px 22px;border-radius:14px}
+  .logo{max-width:72px;max-height:72px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:26px;font-weight:700;
+    color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .label{font-family:${bodyFF};font-size:18px;font-weight:700;letter-spacing:4px;
     text-transform:uppercase;color:${accent};margin-bottom:40px}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
@@ -659,8 +682,11 @@ function buildStoryCtaHTML(story, client) {
   <div class="glow"></div>
   <div class="corner-tl"></div>
   <div class="corner-br"></div>
-  <div class="content">
+  <div class="logo-wrap">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
+  </div>
+  <div class="content">
     <div class="label">Acción</div>
     <div class="main-text">${textHtml}</div>
     <div class="cta-btn">${ctaHtml}</div>
@@ -700,7 +726,13 @@ function buildStoryCountdownHTML(story, client) {
     align-items:center;justify-content:center;padding:20px 90px}
   .bot-zone{flex:0 0 22%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:20px 90px 100px}
-  .logo{max-width:480px;max-height:192px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .logo-wrap{position:absolute;top:72px;left:60px;z-index:2;
+    display:inline-flex;align-items:center;gap:14px;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);
+    padding:14px 22px;border-radius:14px}
+  .logo{max-width:72px;max-height:72px;object-fit:contain;display:block}
+  .logo-name{font-family:${bodyFF};font-size:26px;font-weight:700;
+    color:${accent};letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:880px;
     text-shadow:0 2px 20px rgba(0,0,0,0.5)}
@@ -713,8 +745,11 @@ function buildStoryCountdownHTML(story, client) {
 </style></head><body>
   <div class="bar-top"></div>
   <div class="bar-bot"></div>
-  <div class="top-zone">
+  <div class="logo-wrap">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <span class="logo-name">${esc(client.name || 'La Zona Campeón')}</span>
+  </div>
+  <div class="top-zone">
     <div class="main-text">${textHtml}</div>
   </div>
   <div class="mid-zone">
