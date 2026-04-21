@@ -528,7 +528,7 @@ function buildStoryTextHTML(story, client) {
   .corner-br{position:absolute;bottom:0;right:0;width:180px;height:180px;
     border-bottom:3px solid ${accent};border-right:3px solid ${accent};opacity:0.5}
   .logo{position:absolute;top:90px;left:50%;transform:translateX(-50%);
-    max-width:360px;max-height:144px;object-fit:contain;opacity:0.9}
+    max-width:480px;max-height:192px;object-fit:contain;opacity:0.9}
   .divider{width:80px;height:3px;background:${accent};margin-bottom:60px;border-radius:2px}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:900px;margin-bottom:60px;
@@ -583,7 +583,7 @@ function buildStoryInteractiveHTML(story, client) {
     align-items:center;justify-content:center;padding:120px 90px 40px;position:relative}
   .bottom-zone{flex:0 0 38%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:20px 90px 120px}
-  .logo{max-width:360px;max-height:144px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .logo{max-width:480px;max-height:192px;object-fit:contain;margin-bottom:56px;opacity:0.9}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:880px;
     text-shadow:0 2px 20px rgba(0,0,0,0.5)}
@@ -700,7 +700,7 @@ function buildStoryCountdownHTML(story, client) {
     align-items:center;justify-content:center;padding:20px 90px}
   .bot-zone{flex:0 0 22%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:20px 90px 100px}
-  .logo{max-width:360px;max-height:144px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .logo{max-width:480px;max-height:192px;object-fit:contain;margin-bottom:56px;opacity:0.9}
   .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
     line-height:1.4;color:${light};text-align:center;max-width:880px;
     text-shadow:0 2px 20px rgba(0,0,0,0.5)}
