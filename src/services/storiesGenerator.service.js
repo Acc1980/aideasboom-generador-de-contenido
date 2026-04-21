@@ -51,7 +51,7 @@ const ACTIVE_DAYS = 6; // Lunes a Sábado (sin Domingo)
  * @param {boolean} opts.replace - Si true, elimina stories anteriores antes de generar
  * @param {number} opts.storiesPerDay - Stories por día (default 5)
  */
-async function generateStories(planningId, { replace = false, storiesPerDay = 5 } = {}) {
+async function generateStories(planningId, { replace = false, storiesPerDay = 3 } = {}) {
   const planning = await Planning.findByPk(planningId, {
     include: [
       { model: Client, as: 'client' },
