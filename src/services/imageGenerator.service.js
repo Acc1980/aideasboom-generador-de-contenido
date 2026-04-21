@@ -380,26 +380,22 @@ async function generateImages(planningId) {
 
   // Posts y carruseles: solo los aprobados
   const pieces = planning.contents.filter(p => p.format !== 'reel' && p.approvalStatus === 'aprobado');
-
-  // Reels aprobados sin video ni solicitud en curso → encolar en Kling
-  const reelsPendingVideo = planning.contents.filter(p =>
-    p.format === 'reel' &&
-    p.approvalStatus === 'aprobado' &&
-    !p.falRequestId &&
-    !p.videoUrl,
-  );
   logger.info(`Generando imágenes para planning ${planningId} → ${pieces.length} piezas (reels excluidos)`);
 
   // Rotación de deportes para que las fotos varíen entre piezas
   const SPORTS_ROTATION = [
-    'jugador de fútbol en acción, estadio lleno, celebración de gol',
-    'jugador de baloncesto saltando a encestar, cancha profesional, NBA style',
-    'atleta corriendo en pista de atletismo, sprint final, estadio olímpico',
-    'tenista golpeando la pelota, cancha profesional, acción dinámica',
-    'boxeador en el ring, guantes rojos, iluminación dramática de ring',
-    'ciclista en velocidad, competencia profesional, primer plano',
-    'nadador en competencia, piscina olímpica, salpicaduras de agua',
-    'voleibolista rematando, red de voleibol, estadio de competencia',
+    'young Latino male soccer player in action, full stadium, goal celebration, cinematic lighting',
+    'young Latina female basketball player jumping to score, professional court, dynamic action',
+    'Latino male athlete sprinting on athletics track, Olympic stadium, final sprint, dramatic light',
+    'Latina female tennis player hitting the ball, professional court, dynamic action, crowd background',
+    'young Latino male soccer player focused before a penalty kick, stadium lights, intense atmosphere',
+    'Latina female volleyball player spiking, volleyball net, competition stadium, action shot',
+    'Latino male swimmer competing, Olympic pool, water splashes, underwater lighting',
+    'young Latina female athlete warming up on field, golden hour light, training environment',
+    'Latino male soccer player in locker room, pre-match focus, team jersey, dramatic lighting',
+    'Latina female runner crossing finish line, athletics track, arms raised, victory moment',
+    'Latino male basketball player dribbling under pressure, crowded gym, sweat and focus',
+    'young Latina female soccer player celebrating a goal, teammates hugging, stadium atmosphere',
   ];
   const sportFor = (idx) => SPORTS_ROTATION[idx % SPORTS_ROTATION.length];
 
@@ -485,24 +481,7 @@ async function generateImages(planningId) {
 
   logger.info(`Total generado: ${generatedFiles.length} archivos en ${outputDir}`);
 
-  // ── Encolar reels aprobados en fal.ai Kling ───────────────────────────────
-  const { submitVideo } = require('./fal.service');
-  const queuedReels = [];
-  for (const reel of reelsPendingVideo) {
-    try {
-      const prompt = reel.script?.prompt || reel.visualDirection || reel.title;
-      const duration = reel.script?.duration || 5;
-      const requestId = await submitVideo(prompt, duration);
-      await reel.update({ falRequestId: requestId });
-      queuedReels.push({ id: reel.id, title: reel.title, requestId });
-      logger.info(`  → Reel "${reel.title}" encolado en Kling → ${requestId}`);
-    } catch (e) {
-      logger.warn(`  ⚠ No se pudo encolar reel "${reel.title}": ${e.message}`);
-    }
-  }
-  if (queuedReels.length) logger.info(`Reels encolados en Kling: ${queuedReels.length}`);
-
-  return { generatedFiles, outputDir, queuedReels };
+  return { generatedFiles, outputDir };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -519,110 +498,114 @@ const STORY_TEMPLATE_MAP = {
 // ── STORY TEXT (teaser, texto_reflexion, dato_curioso, tip_experto) ──────────
 function buildStoryTextHTML(story, client) {
   const bi = client.brandIdentity || {};
-  const primary    = bi.primaryColor || '#9c8aa5';
-  const accent     = bi.accentColor  || '#5e4b63';
-  const textColor  = bi.textColor    || '#3a3a3a';
-  const lightColor = bi.lightColor   || '#eae3dc';
-  const titleFont  = bi.titleFont    || 'Georgia';
-  const bodyFont   = bi.bodyFont     || 'Arial';
-  const titleFF    = ff(titleFont, 'serif');
-  const bodyFF     = ff(bodyFont, 'sans');
+  const dark   = bi.darkColor    || '#0f1923';
+  const accent = bi.accentColor  || '#c8aa32';
+  const light  = '#ffffff';
+  const titleFont = bi.titleFont || 'Georgia';
+  const bodyFont  = bi.bodyFont  || 'Arial';
+  const titleFF   = ff(titleFont, 'serif');
+  const bodyFF    = ff(bodyFont, 'sans');
   const fontsImport = buildFontsImport(titleFont, bodyFont);
-  const logoSrc    = logoToDataUrl(client.logoUrl);
-  const mainText   = story.textContent || '';
-  const fontSize   = hookFontSize(mainText, 64, 36);
-  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
-  const ctaHtml    = story.cta ? esc(story.cta) : '';
+  const logoSrc = logoToDataUrl(client.logoUrl);
+  const mainText = story.textContent || '';
+  const fontSize = hookFontSize(mainText, 72, 40);
+  const textHtml = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml  = story.cta ? esc(story.cta) : '';
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1920px;overflow:hidden}
-  body{background:${lightColor};font-family:${bodyFF};color:${textColor};
+  body{background:${dark};font-family:${bodyFF};color:${light};
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:120px 80px;position:relative}
-  .accent-bar{position:absolute;left:0;top:0;bottom:0;width:6px;background:${accent}}
-  .accent-circle{position:absolute;width:400px;height:400px;border-radius:50%;
-    border:1.5px solid ${primary};opacity:0.08;top:180px;right:-100px}
-  .accent-circle-2{position:absolute;width:280px;height:280px;border-radius:50%;
-    border:1px solid ${accent};opacity:0.06;bottom:280px;left:-80px}
-  .logo{position:absolute;top:80px;left:50%;transform:translateX(-50%);
-    max-width:200px;max-height:80px;object-fit:contain;opacity:0.85}
-  .divider{width:60px;height:3px;background:${accent};margin-bottom:48px;border-radius:2px}
-  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
-    line-height:1.5;color:${primary};text-align:center;max-width:900px;margin-bottom:48px}
-  .divider-b{width:60px;height:3px;background:${accent};margin-bottom:40px;border-radius:2px}
-  .cta-text{font-family:${bodyFF};font-size:24px;font-weight:600;color:${accent};
-    text-align:center;letter-spacing:0.5px;opacity:0.9}
-  .story-label{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
-    font-family:${bodyFF};font-size:14px;letter-spacing:3px;text-transform:uppercase;
-    opacity:0.25;color:${textColor}}
+    padding:140px 90px;position:relative}
+  .bg-glow{position:absolute;width:800px;height:800px;border-radius:50%;
+    background:radial-gradient(circle, ${accent}18 0%, transparent 70%);
+    top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+  .corner-tl{position:absolute;top:0;left:0;width:180px;height:180px;
+    border-top:3px solid ${accent};border-left:3px solid ${accent};opacity:0.5}
+  .corner-br{position:absolute;bottom:0;right:0;width:180px;height:180px;
+    border-bottom:3px solid ${accent};border-right:3px solid ${accent};opacity:0.5}
+  .logo{position:absolute;top:90px;left:50%;transform:translateX(-50%);
+    max-width:220px;max-height:88px;object-fit:contain;opacity:0.9}
+  .divider{width:80px;height:3px;background:${accent};margin-bottom:60px;border-radius:2px}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
+    line-height:1.4;color:${light};text-align:center;max-width:900px;margin-bottom:60px;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5)}
+  .accent-word{color:${accent}}
+  .divider-b{width:80px;height:3px;background:${accent};margin-bottom:40px;border-radius:2px}
+  .cta-text{font-family:${bodyFF};font-size:28px;font-weight:700;color:${accent};
+    text-align:center;letter-spacing:1px;text-transform:uppercase}
 </style></head><body>
-  <div class="accent-bar"></div>
-  <div class="accent-circle"></div>
-  <div class="accent-circle-2"></div>
+  <div class="bg-glow"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
   ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
   <div class="divider"></div>
   <div class="main-text">${textHtml}</div>
   <div class="divider-b"></div>
   ${ctaHtml ? `<div class="cta-text">${ctaHtml}</div>` : ''}
-  <div class="story-label">${esc(story.storyType).replace(/_/g, ' ')}</div>
 </body></html>`;
 }
 
 // ── STORY INTERACTIVE (encuesta, pregunta, slider_emocional, quiz) ──────────
 function buildStoryInteractiveHTML(story, client) {
   const bi = client.brandIdentity || {};
-  const primary    = bi.primaryColor || '#9c8aa5';
-  const accent     = bi.accentColor  || '#5e4b63';
-  const lightColor = bi.lightColor   || '#eae3dc';
-  const titleFont  = bi.titleFont    || 'Georgia';
-  const bodyFont   = bi.bodyFont     || 'Arial';
-  const titleFF    = ff(titleFont, 'serif');
-  const bodyFF     = ff(bodyFont, 'sans');
+  const dark   = bi.darkColor   || '#0f1923';
+  const accent = bi.accentColor || '#c8aa32';
+  const light  = '#ffffff';
+  const titleFont = bi.titleFont || 'Georgia';
+  const bodyFont  = bi.bodyFont  || 'Arial';
+  const titleFF   = ff(titleFont, 'serif');
+  const bodyFF    = ff(bodyFont, 'sans');
   const fontsImport = buildFontsImport(titleFont, bodyFont);
-  const logoSrc    = logoToDataUrl(client.logoUrl);
-  const mainText   = story.textContent || '';
-  const fontSize   = hookFontSize(mainText, 56, 34);
-  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
+  const logoSrc  = logoToDataUrl(client.logoUrl);
+  const mainText = story.textContent || '';
+  const fontSize = hookFontSize(mainText, 64, 36);
+  const textHtml = esc(mainText).replace(/\n/g, '<br>');
   const stickerLabels = {
-    encuesta: 'Encuesta', pregunta: 'Caja de preguntas',
-    slider_emocional: 'Slider', quiz: 'Quiz',
+    encuesta: '¿SÍ o NO?', pregunta: 'Respóndeme', slider_emocional: 'Desliza', quiz: 'Quiz',
   };
-  const stickerLabel = stickerLabels[story.storyType] || '';
+  const stickerLabel = stickerLabels[story.storyType] || 'Responde';
+  const stickerHint = story.stickerSuggestion ? esc(story.stickerSuggestion) : stickerLabel;
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1920px;overflow:hidden}
-  body{background:${primary};font-family:${bodyFF};color:${lightColor};
+  body{background:${dark};font-family:${bodyFF};color:${light};
     display:flex;flex-direction:column;padding:0;position:relative}
-  .top-zone{flex:0 0 60%;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:100px 80px 40px;position:relative}
-  .bottom-zone{flex:0 0 40%;display:flex;flex-direction:column;
-    align-items:center;justify-content:flex-start;padding:20px 80px}
-  .accent-bar{position:absolute;right:0;top:0;bottom:0;width:6px;background:${accent}}
-  .accent-dots{position:absolute;top:60px;right:60px;display:flex;gap:8px}
-  .accent-dot{width:10px;height:10px;border-radius:50%;background:${lightColor};opacity:0.15}
-  .logo{max-width:160px;max-height:64px;object-fit:contain;margin-bottom:48px;opacity:0.8}
-  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
-    line-height:1.5;color:${lightColor};text-align:center;max-width:880px}
+  .bg-stripe{position:absolute;top:0;left:0;right:0;height:8px;background:${accent}}
+  .bg-stripe-b{position:absolute;bottom:0;left:0;right:0;height:8px;background:${accent}}
+  .top-zone{flex:0 0 62%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:120px 90px 40px;position:relative}
+  .bottom-zone{flex:0 0 38%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px 90px 120px}
+  .logo{max-width:200px;max-height:80px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
+    line-height:1.4;color:${light};text-align:center;max-width:880px;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5)}
   .divider{width:80px;height:3px;background:${accent};margin:40px auto 0;border-radius:2px}
-  .sticker-zone{font-family:${bodyFF};font-size:18px;font-weight:600;letter-spacing:2px;
-    text-transform:uppercase;color:${lightColor};border:2px dashed ${lightColor};
-    border-radius:16px;padding:24px 40px;opacity:0.15}
+  .sticker-zone{background:${accent};color:${dark};border-radius:20px;
+    padding:36px 60px;text-align:center;max-width:820px;width:100%}
+  .sticker-label{font-family:${bodyFF};font-size:20px;font-weight:700;letter-spacing:3px;
+    text-transform:uppercase;margin-bottom:12px;opacity:0.7}
+  .sticker-text{font-family:${titleFF};font-size:32px;font-weight:800;line-height:1.3}
 </style></head><body>
-  <div class="accent-bar"></div>
+  <div class="bg-stripe"></div>
+  <div class="bg-stripe-b"></div>
   <div class="top-zone">
-    <div class="accent-dots"><div class="accent-dot"></div><div class="accent-dot"></div><div class="accent-dot"></div></div>
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
     <div class="main-text">${textHtml}</div>
     <div class="divider"></div>
   </div>
   <div class="bottom-zone">
-    <div class="sticker-zone">${esc(stickerLabel)}</div>
+    <div class="sticker-zone">
+      <div class="sticker-label">${esc(stickerLabel)}</div>
+      <div class="sticker-text">${stickerHint}</div>
+    </div>
   </div>
 </body></html>`;
 }
@@ -630,106 +613,113 @@ function buildStoryInteractiveHTML(story, client) {
 // ── STORY CTA (cta_directa) ─────────────────────────────────────────────────
 function buildStoryCtaHTML(story, client) {
   const bi = client.brandIdentity || {};
-  const primary    = bi.primaryColor || '#9c8aa5';
-  const accent     = bi.accentColor  || '#5e4b63';
-  const lightColor = bi.lightColor   || '#eae3dc';
-  const titleFont  = bi.titleFont    || 'Georgia';
-  const bodyFont   = bi.bodyFont     || 'Arial';
-  const titleFF    = ff(titleFont, 'serif');
-  const bodyFF     = ff(bodyFont, 'sans');
+  const dark   = bi.darkColor   || '#0f1923';
+  const accent = bi.accentColor || '#c8aa32';
+  const light  = '#ffffff';
+  const titleFont = bi.titleFont || 'Georgia';
+  const bodyFont  = bi.bodyFont  || 'Arial';
+  const titleFF   = ff(titleFont, 'serif');
+  const bodyFF    = ff(bodyFont, 'sans');
   const fontsImport = buildFontsImport(titleFont, bodyFont);
-  const logoSrc    = logoToDataUrl(client.logoUrl);
-  const mainText   = story.textContent || '';
-  const fontSize   = hookFontSize(mainText, 58, 34);
-  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
-  const ctaHtml    = esc(story.cta || 'Toca aquí');
+  const logoSrc  = logoToDataUrl(client.logoUrl);
+  const mainText = story.textContent || '';
+  const fontSize = hookFontSize(mainText, 66, 38);
+  const textHtml = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml  = esc(story.cta || 'Link en mi bio →');
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1920px;overflow:hidden}
-  body{background:${accent};font-family:${bodyFF};color:${lightColor};
+  body{background:linear-gradient(160deg, ${dark} 0%, #1a2a1a 100%);
+    font-family:${bodyFF};color:${light};
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:140px 80px;position:relative}
-  .bg-gradient{position:absolute;inset:0;
-    background:linear-gradient(170deg, ${accent} 0%, ${primary} 100%);opacity:0.3}
-  .line-top{position:absolute;top:0;left:0;right:0;height:8px;background:${lightColor};opacity:0.1}
-  .line-bottom{position:absolute;bottom:0;left:0;right:0;height:8px;background:${lightColor};opacity:0.1}
-  .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%}
-  .logo{max-width:180px;max-height:72px;object-fit:contain;margin-bottom:80px;opacity:0.9}
-  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
-    line-height:1.5;color:${lightColor};text-align:center;max-width:880px;margin-bottom:64px}
-  .cta-btn{background:${lightColor};color:${accent};padding:28px 72px;border-radius:60px;
-    font-family:${bodyFF};font-size:28px;font-weight:700;letter-spacing:0.5px;text-align:center;
-    box-shadow:0 8px 32px rgba(0,0,0,0.15)}
-  .swipe{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
-    font-family:${bodyFF};font-size:16px;letter-spacing:3px;text-transform:uppercase;
-    opacity:0.3;color:${lightColor}}
+    padding:140px 90px;position:relative}
+  .glow{position:absolute;width:900px;height:900px;border-radius:50%;
+    background:radial-gradient(circle, ${accent}22 0%, transparent 65%);
+    top:50%;left:50%;transform:translate(-50%,-50%)}
+  .corner-tl{position:absolute;top:0;left:0;width:200px;height:200px;
+    border-top:4px solid ${accent};border-left:4px solid ${accent}}
+  .corner-br{position:absolute;bottom:0;right:0;width:200px;height:200px;
+    border-bottom:4px solid ${accent};border-right:4px solid ${accent}}
+  .content{position:relative;z-index:1;display:flex;flex-direction:column;
+    align-items:center;width:100%;gap:0}
+  .logo{max-width:220px;max-height:88px;object-fit:contain;margin-bottom:80px;opacity:0.95}
+  .label{font-family:${bodyFF};font-size:18px;font-weight:700;letter-spacing:4px;
+    text-transform:uppercase;color:${accent};margin-bottom:40px}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
+    line-height:1.4;color:${light};text-align:center;max-width:880px;margin-bottom:80px;
+    text-shadow:0 2px 30px rgba(0,0,0,0.6)}
+  .cta-btn{background:${accent};color:${dark};padding:32px 80px;border-radius:8px;
+    font-family:${bodyFF};font-size:30px;font-weight:900;letter-spacing:1px;
+    text-align:center;text-transform:uppercase;
+    box-shadow:0 8px 40px ${accent}55}
 </style></head><body>
-  <div class="bg-gradient"></div>
-  <div class="line-top"></div>
-  <div class="line-bottom"></div>
+  <div class="glow"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
   <div class="content">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
+    <div class="label">Acción</div>
     <div class="main-text">${textHtml}</div>
     <div class="cta-btn">${ctaHtml}</div>
   </div>
-  <div class="swipe">Desliza hacia arriba</div>
 </body></html>`;
 }
 
 // ── STORY COUNTDOWN ─────────────────────────────────────────────────────────
 function buildStoryCountdownHTML(story, client) {
   const bi = client.brandIdentity || {};
-  const primary    = bi.primaryColor || '#9c8aa5';
-  const accent     = bi.accentColor  || '#5e4b63';
-  const textColor  = bi.textColor    || '#3a3a3a';
-  const lightColor = bi.lightColor   || '#eae3dc';
-  const titleFont  = bi.titleFont    || 'Georgia';
-  const bodyFont   = bi.bodyFont     || 'Arial';
-  const titleFF    = ff(titleFont, 'serif');
-  const bodyFF     = ff(bodyFont, 'sans');
+  const dark   = bi.darkColor   || '#0f1923';
+  const accent = bi.accentColor || '#c8aa32';
+  const light  = '#ffffff';
+  const titleFont = bi.titleFont || 'Georgia';
+  const bodyFont  = bi.bodyFont  || 'Arial';
+  const titleFF   = ff(titleFont, 'serif');
+  const bodyFF    = ff(bodyFont, 'sans');
   const fontsImport = buildFontsImport(titleFont, bodyFont);
-  const logoSrc    = logoToDataUrl(client.logoUrl);
-  const mainText   = story.textContent || '';
-  const fontSize   = hookFontSize(mainText, 52, 32);
-  const textHtml   = esc(mainText).replace(/\n/g, '<br>');
-  const ctaHtml    = story.cta ? esc(story.cta) : '';
+  const logoSrc  = logoToDataUrl(client.logoUrl);
+  const mainText = story.textContent || '';
+  const fontSize = hookFontSize(mainText, 60, 36);
+  const textHtml = esc(mainText).replace(/\n/g, '<br>');
+  const ctaHtml  = story.cta ? esc(story.cta) : '';
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   ${fontsImport}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:1080px;height:1920px;overflow:hidden}
-  body{background:${lightColor};font-family:${bodyFF};color:${textColor};
+  body{background:${dark};font-family:${bodyFF};color:${light};
     display:flex;flex-direction:column;padding:0;position:relative}
-  .accent-bar{position:absolute;left:0;top:0;bottom:0;width:6px;background:${primary}}
-  .accent-bar-r{position:absolute;right:0;top:0;bottom:0;width:6px;background:${primary}}
-  .top-zone{flex:0 0 45%;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:100px 80px 20px}
-  .mid-zone{flex:0 0 30%;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:20px 80px}
-  .bot-zone{flex:0 0 25%;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:20px 80px 80px}
-  .logo{max-width:180px;max-height:72px;object-fit:contain;margin-bottom:48px;opacity:0.85}
-  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-style:italic;font-weight:700;
-    line-height:1.5;color:${primary};text-align:center;max-width:880px}
-  .divider{width:60px;height:3px;background:${accent};margin:32px auto;border-radius:2px}
-  .countdown-ph{font-family:${bodyFF};font-size:16px;letter-spacing:2px;text-transform:uppercase;
-    color:${textColor};border:2px dashed ${primary};border-radius:16px;padding:32px 48px;
-    opacity:0.15;text-align:center}
-  .cta-text{font-family:${bodyFF};font-size:24px;font-weight:600;color:${accent};text-align:center}
+  .bar-top{position:absolute;top:0;left:0;right:0;height:10px;background:${accent}}
+  .bar-bot{position:absolute;bottom:0;left:0;right:0;height:10px;background:${accent}}
+  .top-zone{flex:0 0 50%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:130px 90px 30px}
+  .mid-zone{flex:0 0 28%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px 90px}
+  .bot-zone{flex:0 0 22%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px 90px 100px}
+  .logo{max-width:200px;max-height:80px;object-fit:contain;margin-bottom:56px;opacity:0.9}
+  .main-text{font-family:${titleFF};font-size:${fontSize}px;font-weight:800;
+    line-height:1.4;color:${light};text-align:center;max-width:880px;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5)}
+  .divider{width:80px;height:3px;background:${accent};margin:32px auto;border-radius:2px}
+  .countdown-ph{font-family:${bodyFF};font-size:22px;font-weight:700;letter-spacing:3px;
+    text-transform:uppercase;color:${dark};background:${accent};border-radius:16px;
+    padding:36px 64px;text-align:center}
+  .cta-text{font-family:${bodyFF};font-size:28px;font-weight:700;color:${accent};
+    text-align:center;letter-spacing:1px}
 </style></head><body>
-  <div class="accent-bar"></div>
-  <div class="accent-bar-r"></div>
+  <div class="bar-top"></div>
+  <div class="bar-bot"></div>
   <div class="top-zone">
     ${logoSrc ? `<img class="logo" src="${logoSrc}">` : ''}
     <div class="main-text">${textHtml}</div>
   </div>
   <div class="mid-zone">
     <div class="divider"></div>
-    <div class="countdown-ph">Countdown sticker</div>
+    <div class="countdown-ph">⏱ Countdown sticker aquí</div>
   </div>
   <div class="bot-zone">
     ${ctaHtml ? `<div class="cta-text">${ctaHtml}</div>` : ''}

@@ -47,6 +47,8 @@ REGLAS OBLIGATORIAS:
     prompt += `\n5. Hashtags base a incluir siempre: ${baseHashtags.join(' ')}`;
   }
 
+  prompt += `\n6. Hashtags: máximo 5 por pieza (recomendación Instagram 2024). Escoge los más relevantes para cada pieza específica.`;
+
   prompt += `
 
 DIRECTRICES DE CTA — CATEGORÍAS Y EJEMPLOS:
@@ -158,6 +160,10 @@ REGLAS DE COPY OBLIGATORIAS:
 
 Distribuye los ${count} posts entre TOFU, MOFU y BOFU según el contenido generado.
 
+REGLA DE CTA:
+- TOFU: el CTA siempre termina con "Guía gratis en el enlace de la bio 👆"
+- MOFU/BOFU: el CTA puede variar según el objetivo (guardar el post, comentar, ver el plan, etc.)
+
 ═══ ESTRUCTURA JSON ═══
 {
   "pieces": [
@@ -167,9 +173,9 @@ Distribuye los ${count} posts entre TOFU, MOFU y BOFU según el contenido genera
       "funnelStage": "tofu" | "mofu" | "bofu",
       "title": "Título descriptivo interno (no es el copy)",
       "hook": "Primera oración del post. La que para el scroll.",
-      "copy": "Texto completo publicable en redes. MÍNIMO 180 PALABRAS. Párrafos separados con \\n\\n.",
-      "cta": "Call to action alineado con la etapa del embudo",
-      "hashtags": ["hashtag1", "hashtag2", "hasta10hashtags"],
+      "copy": "Texto completo publicable en redes. MÍNIMO 180 PALABRAS. Párrafos separados con \\n\\n. IMPORTANTE: NO incluyas el CTA al final del copy — el CTA va en su propio campo.",
+      "cta": "Call to action alineado con la etapa del embudo (sin URL, sin 'descarga', solo la acción)",
+      "hashtags": ["EXACTAMENTE 5 hashtags en español, relevantes para el contenido — PROHIBIDO usar DeportistasHispanos, HispanicAthletes o cualquier variante de hispano/hispana. Sin el símbolo #."],
       "visualDirection": "Descripción de la imagen o composición visual que acompaña el post",
       "script": null,
       "carouselSlides": null
@@ -216,9 +222,9 @@ Distribuye los ${count} carruseles entre TOFU, MOFU y BOFU según el contenido g
       "funnelStage": "tofu" | "mofu" | "bofu",
       "title": "Título descriptivo interno",
       "hook": "Gancho de la portada (slide 1) — lo que hace que alguien deslice",
-      "copy": "Caption del carrusel para redes. 60-100 palabras.",
-      "cta": "Call to action del último slide",
-      "hashtags": ["hashtag1", "hashtag2"],
+      "copy": "Caption del carrusel para redes. 60-100 palabras. NO incluyas el CTA al final.",
+      "cta": "Call to action del último slide. TOFU: terminar con 'Guía gratis en el enlace de la bio 👆'. MOFU/BOFU: acción relevante al objetivo.",
+      "hashtags": ["EXACTAMENTE 5 hashtags en español, relevantes para el contenido — PROHIBIDO usar DeportistasHispanos, HispanicAthletes o cualquier variante de hispano/hispana. Sin el símbolo #."],
       "visualDirection": "Estilo visual general: colores, tipografía, dinámica de los slides",
       "script": null,
       "carouselSlides": {
@@ -257,6 +263,10 @@ REGLAS DE GUIÓN OBLIGATORIAS:
 
 Distribuye los ${count} reels entre TOFU, MOFU y BOFU según el contenido generado.
 
+REGLA DE CTA:
+- TOFU: el CTA hablado siempre termina invitando a la guía gratis: "La guía está gratis, el link está en la bio."
+- MOFU/BOFU: el CTA puede variar (guardar, comentar, ver el plan, etc.)
+
 ═══ ESTRUCTURA JSON ═══
 {
   "pieces": [
@@ -266,9 +276,9 @@ Distribuye los ${count} reels entre TOFU, MOFU y BOFU según el contenido genera
       "funnelStage": "tofu" | "mofu" | "bofu",
       "title": "Título descriptivo interno del reel",
       "hook": "Primera frase que se dice en cámara — la que crea tensión inmediata",
-      "copy": "Caption para redes. 30-50 palabras.",
-      "cta": "CTA hablado al final del reel",
-      "hashtags": ["hashtag1", "hashtag2"],
+      "copy": "Caption para redes. 30-50 palabras. NO incluyas el CTA al final.",
+      "cta": "CTA hablado al final del reel (sin URL, solo la acción)",
+      "hashtags": ["EXACTAMENTE 5 hashtags en español, relevantes para el contenido — PROHIBIDO usar DeportistasHispanos, HispanicAthletes o cualquier variante de hispano/hispana. Sin el símbolo #."],
       "visualDirection": "Indicaciones de producción: ángulo, escenario, dinámica visual, si es hablando a cámara o voice-over",
       "script": {
         "scenes": [
@@ -352,36 +362,28 @@ NIVEL DE PROFUNDIDAD REQUERIDO:
 - El contenido debe generar la reacción: "¿Cómo sabe ella exactamente lo que estoy viviendo?"
 
 TIPOS DE STORIES QUE PUEDES USAR:
-- **grabada_coach**: La coach habla directo a cámara con INTENSIDAD y VERDAD. No es conversación casual — es confrontación amorosa. ESTAS SON LAS MÁS IMPORTANTES.
-- **texto_reflexion**: Frase de alto impacto emocional que obligue a detenerse y reflexionar profundamente. No frases bonitas — verdades incómodas.
+- **texto_reflexion**: Frase de alto impacto emocional que obligue a detenerse y reflexionar profundamente. No frases bonitas — verdades incómodas. LA MÁS IMPORTANTE.
+- **frase_impacto**: Cita o afirmación devastadoramente precisa sobre el dolor de la audiencia. Una sola línea que golpee sin rodeos.
+- **cita_visual**: Frase atribuida a la marca o a una referencia externa, con diseño de alto contraste visual.
 - **teaser**: Anticipa la publicación del día con una pregunta desafiante que enganche emocionalmente.
 - **encuesta**: Pregunta que confronte con dos opciones que revelen un patrón inconsciente.
 - **pregunta**: Pregunta abierta profunda que la audiencia probablemente nunca se ha hecho.
 - **tip_experto**: Herramienta práctica de transformación personal — no un tip genérico, sino algo que cambie la perspectiva.
 - **dato_curioso**: Dato psicológico o de neurociencia que valide la experiencia emocional de la audiencia.
-- **behind_the_scenes**: Momentos REALES y VULNERABLES de la coach — no posados, sino auténticos.
 - **cta_directa**: Invitación directa y sin rodeos que conecte con la urgencia de transformarse.
 - **slider_emocional**: Pregunta que mida el nivel de dolor, urgencia o deseo de cambio.
 - **quiz**: Pregunta que revele un patrón inconsciente con opciones que confronten.
 - **countdown**: Generar anticipación emocional profunda (no solo "algo viene", sino "tu vida está a punto de cambiar").
 
-REGLAS DE STORIES GRABADAS (is_recorded = true):
-- El guion (campo "script") debe ser EXACTAMENTE lo que la coach dice en cámara, palabra por palabra.
-- Duración: ~20 segundos por story grabada. Entre 30-50 palabras narradas. Breve pero PODEROSA.
-- Cada grabada es UN golpe emocional directo — una sola idea contundente, no un monólogo.
-- La coach CONFRONTA con amor. Mira a cámara con intensidad.
-- Debe sentirse como si te estuviera hablando DIRECTAMENTE A TI sobre algo que nadie más se atreve a decirte.
-- Arrancar con algo que ENGANCHE de inmediato: una verdad incómoda, una pregunta que duela, una revelación personal.
-- NUNCA empezar con "hola chicas" o saludos vacíos. Ir directo al corazón del asunto.
-- El script debe tener ARCO narrativo: enganche → desarrollo → cierre poderoso.
-- Variedad en el "escenario" con intención: en el auto (reflexión espontánea), en casa con luz tenue (vulnerabilidad), caminando (determinación), frente al espejo (confrontación con una misma).
-
-REGLAS DE STORIES DE TEXTO/IMAGEN (is_recorded = false):
+REGLAS DE STORIES DE TEXTO/IMAGEN (todas las stories son de texto/imagen — isRecorded SIEMPRE false):
+- El campo "isRecorded" SIEMPRE debe ser false. El campo "script" SIEMPRE debe ser null.
+- PROHIBIDO usar storyType "grabada_coach" — no existe, nunca lo uses.
 - El texto (campo "textContent") debe ser de ALTO IMPACTO EMOCIONAL. 2-4 líneas que golpeen.
 - Cada frase de texto debe funcionar como un "puñetazo emocional" — algo que la persona necesitaba leer hoy.
 - NO frases motivacionales genéricas. SÍ verdades específicas que nombren el dolor real.
 - El texto debe provocar que la persona haga screenshot o responda a la story.
-- Incluir indicaciones visuales claras en "visualDirection" (fondo, tipografía, elementos).
+- Incluir indicaciones visuales claras en "visualDirection": fondo (color, gradiente, imagen de fondo sugerida), tipografía (tamaño, peso, alineación), elementos adicionales (íconos, líneas, capas).
+- Variar el diseño visual cada día: fondos oscuros con texto blanco, fondos con textura, fondos de color marca, fondos con foto difuminada.
 
 FORMATO DE RESPUESTA:
 Responde SIEMPRE en JSON válido con la estructura indicada en el prompt del usuario. Sin texto antes ni después del JSON.`;
@@ -449,21 +451,20 @@ Estas son las piezas de contenido principal que se publican esta semana. Las sto
 ═══ REGLAS DE DISTRIBUCIÓN DIARIA ═══
 
 1. CADA DÍA (Lunes a Sábado) debe tener EXACTAMENTE ${storiesPerDay} stories, numeradas del 1 al ${storiesPerDay}. NO generar stories para el Domingo (día 7).
-2. EXACTAMENTE 2 stories grabadas por la coach (isRecorded: true) por día. Las grabadas deben ser los MOMENTOS MÁS FUERTES del día — donde la coach confronta o revela algo poderoso.
+2. TODAS las stories son de texto/imagen — isRecorded SIEMPRE false, script SIEMPRE null.
 3. Los días que coinciden con una publicación principal:
-   - Story 1: ENGANCHE emocional — una verdad incómoda o pregunta desafiante que anticipe el tema de la publicación.
-   - Story 2: GRABADA — la coach confronta directamente sobre el tema (~20 segundos, 30-50 palabras).
-   - Story 3: REFLEXIÓN o DATO profundo que amplíe la perspectiva y confronte creencias.
-   - Story 4: GRABADA — la coach profundiza o revela algo vulnerable desde su experiencia (~20 segundos, 30-50 palabras).
-   - Story 5: CTA potente que conecte la urgencia emocional con una acción concreta.
+   - Story 1: TEASER — pregunta desafiante o verdad incómoda que anticipe emocionalmente el tema de la publicación.
+   - Story 2: FRASE_IMPACTO o TEXTO_REFLEXION — golpe emocional directo sobre el tema central.
+   - Story 3: DATO_CURIOSO o TIP_EXPERTO — dato psicológico o herramienta concreta que amplíe la perspectiva.
+   - Story 4: ENCUESTA o PREGUNTA — confronta a la audiencia con un patrón inconsciente relacionado al tema.
+   - Story 5: CTA_DIRECTA — invitación potente conectada a la urgencia emocional del día.
 4. Los días SIN publicación principal:
    - Profundizar en temáticas de transformación: relaciones, heridas emocionales, patrones familiares, autoexigencia, culpa, vergüenza.
    - Cada día sin publicación es una oportunidad de CONFRONTAR un patrón específico distinto.
-   - Conectar temáticamente con el hilo narrativo de la semana.
-5. ARCO NARRATIVO DIARIO: La primera story ABRE una herida (pregunta incómoda), las del medio la EXPLORAN con profundidad, la última OFRECE un camino de transformación o invita a la acción.
-6. VARIEDAD de stickers interactivos: no repetir el mismo tipo dos días seguidos. Las encuestas deben confrontar ("¿Cuál describes mejor tu situación: A o B?"), no ser triviales.
-7. Para cada story grabada: incluir indicaciones de escenario en visualDirection con INTENCIÓN emocional (luz tenue para vulnerabilidad, caminando para determinación, frente al espejo para confrontación, en el auto como reflexión espontánea).
-8. CADA STORY GRABADA debe tener un script de 30-50 palabras (~20 segundos). Un solo golpe emocional contundente — enganche directo, idea clara, cierre fuerte. No monólogos largos.
+   - Mezclar tipos: frase_impacto, cita_visual, encuesta, pregunta, slider_emocional, quiz, countdown.
+5. ARCO NARRATIVO DIARIO: La primera story ABRE una herida (pregunta incómoda o verdad perturbadora), las del medio la EXPLORAN con profundidad y confrontación, la última OFRECE un camino de transformación o invita a la acción.
+6. VARIEDAD de tipos: no repetir el mismo tipo de story más de 2 días seguidos. Rotar entre texto_reflexion, frase_impacto, cita_visual, encuesta, pregunta, tip_experto, dato_curioso, cta_directa, slider_emocional, quiz, countdown, teaser.
+7. DISEÑO VISUAL: Variar el estilo visual cada día en "visualDirection" — fondos oscuros con texto blanco, fondos de color marca, fondos con textura o foto difuminada, tipografía en bloque vs fluida.
 
 ═══ VINCULACIÓN CON CONTENIDO ═══
 - Si una story refuerza una pieza específica, incluye el título exacto de esa pieza en "relatedContentTitle".
@@ -476,10 +477,10 @@ Estas son las piezas de contenido principal que se publican esta semana. Las sto
       "dayOfWeek": 1,
       "dayLabel": "Lunes",
       "order": 1,
-      "storyType": "teaser | grabada_coach | texto_reflexion | encuesta | pregunta | tip_experto | dato_curioso | behind_the_scenes | cta_directa | slider_emocional | quiz | countdown",
-      "isRecorded": true | false,
-      "script": "Guion palabra por palabra si isRecorded=true. null si es texto/imagen.",
-      "textContent": "Texto de la story si isRecorded=false. null si es grabada.",
+      "storyType": "teaser | texto_reflexion | frase_impacto | cita_visual | encuesta | pregunta | tip_experto | dato_curioso | cta_directa | slider_emocional | quiz | countdown",
+      "isRecorded": false,
+      "script": null,
+      "textContent": "Texto de alto impacto emocional de la story. SIEMPRE requerido.",
       "visualDirection": "Indicaciones visuales: fondo, escenario, tipografía, elementos.",
       "cta": "CTA si aplica, null si no.",
       "stickerSuggestion": "Tipo y contenido del sticker: 'encuesta: Opción A / Opción B' o 'pregunta: ¿...?' o null",
